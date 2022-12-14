@@ -11,10 +11,9 @@ setup(
     entry_points={
         'console_scripts': [
             # exe_name=package.pyfilename:functionname
-            'fleak=fleak:main',
+            'fleak=fleak.main:main',
         ],
     },
-    # next line is crucial
     packages=find_packages(),
     install_requires=[
         'flet>=0.1.33',

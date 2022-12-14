@@ -1,10 +1,10 @@
-FROM python:3.9-alpine
+FROM python:3-alpine
 
 WORKDIR /app
 
 COPY requirements.txt ./
 RUN apk update && apk upgrade && \
-    apk add --no-cache bash git
+    apk add --no-cache bash git py3-numpy g++
 RUN pip install git+https://github.com/lowellinstruments/lowell-mat.git@poor
 RUN pip install --no-cache-dir -r requirements.txt
 

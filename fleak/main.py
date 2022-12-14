@@ -39,7 +39,8 @@ def fleak_main(page: ft.Page):
     def gui_connect(_):
         # if not dd_loggers.value:
         #     return
-        # m = dd_loggers.value.split(' ')[0]
+
+        m = dd_loggers.value.split(' ')[0]
         if platform.node() == 'ARCHER':
             print('epi')
             m = '60:77:71:22:C9:B3'

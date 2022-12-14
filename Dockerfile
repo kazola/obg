@@ -7,7 +7,6 @@ COPY h5py-3.7.0-cp39-cp39-manylinux_2_12_x86_64.manylinux2010_x86_64.whl ./
 RUN apt update
 RUN pip install -U pip setuptools wheel
 RUN pip install git+https://github.com/lowellinstruments/lowell-mat.git@poor
-RUN pip install ./h5py-3.7.0-cp39-cp39-manylinux_2_12_x86_64.manylinux2010_x86_64.whl
 RUN pip install --no-cache-dir -r requirements.txt  --only-binary=:all:
 
 COPY . .

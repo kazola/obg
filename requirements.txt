@@ -1,2 +1,6 @@
 flet>=0.1.33
 bleak
+numpy
+pandas
+h5py
+pyserial

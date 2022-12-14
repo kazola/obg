@@ -1,10 +1,2 @@
 flet>=0.1.33
-#h5py
-#numpy
-pyserial
-pandas
-humanize
 bleak
-awscli
-boto3
-tzlocal

@@ -2,6 +2,7 @@ import flet as ft
 import bleak
 import asyncio
 from bleak import BLEDevice, BleakError
+import platform
 from main_elements import rue, \
     dd_loggers, \
     dd_files, \
@@ -38,7 +39,9 @@ def main(page: ft.Page):
         # if not dd_loggers.value:
         #     return
         # m = dd_loggers.value.split(' ')[0]
-        m = '60:77:71:22:C9:B3'
+        if platform.node() == 'ARCHER':
+            print('epi')
+            m = '60:77:71:22:C9:B3'
         rue(_ble_connect(m))
 
     def gui_disconnect(_): rue(_ble_disconnect())

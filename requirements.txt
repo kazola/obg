@@ -1,6 +1,6 @@
 flet>=0.1.33
 h5py
-numpy
+#numpy
 pyserial
 pandas
 humanize

@@ -7,10 +7,16 @@ from main_elements import rue, \
     dd_files, \
     lv, \
     lc, \
-    progress_bar
+    progress_bar, dlg_file_downloaded
 
 
 def main(page: ft.Page):
+
+    def open_dlg_file_downloaded():
+        page.dialog = dlg_file_downloaded
+        dlg_file_downloaded.open = True
+        page.update()
+
     def _t(s):
         lv.controls.append(ft.Text(str(s), size=20))
         page.update()
@@ -151,6 +157,7 @@ def main(page: ft.Page):
             _t(s.format(name, size))
             with open('_dl_files/{}'.format(name), 'wb') as f:
                 f.write(rv[1])
+            open_dlg_file_downloaded()
 
 
 if __name__ == '__main__':

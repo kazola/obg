@@ -17,31 +17,53 @@ from fleak.main_elements import \
 
 def fleak_main(page: ft.Page):
 
-    def open_dlg_file_downloaded(p):
+    # -------------------------
+    # page dialogs and events
+    # -------------------------
+
+    def _page_on_tab_close(_):
+        click_btn_disconnect(None)
+
+    def _page_on_error(e):
+        print(e)
+
+    page.on_disconnect = _page_on_tab_close
+    page.on_error = _page_on_error
+    page.title = "FLET Lowell Instruments BLE console"
+    page.vertical_alignment = ft.MainAxisAlignment.CENTER
+
+    def _page_open_dlg_file_downloaded(p):
         page.dialog = dlg_file_downloaded
         dlg_file_downloaded.title = ft.Text('file downloaded OK!')
         dlg_file_downloaded.content = ft.Text('we left it in\n{}'.format(p))
         dlg_file_downloaded.open = True
         page.update()
 
-    def _t(s):
+    def _page_trace(s):
         lv.controls.append(ft.Text(str(s), size=20))
         page.update()
         print(str(s))
 
-    def gui_scan(_):
+    def _t(s):
+        _page_trace(s)
+
+    # ------------------------
+    # page icon button clicks
+    # ------------------------
+
+    def click_btn_scan(_):
         dd_loggers.value = ''
         dd_loggers.options = []
         page.update()
         rue(_ble_scan())
 
-    def gui_cmd_dir(_):
+    def click_btn_cmd_dir(_):
         dd_files.value = ''
         dd_files.options = []
         page.update()
         rue(_ble_cmd_dir())
 
-    def gui_connect(_):
+    def click_btn_connect(_):
         # if not dd_loggers.value:
         #     return
         m = dd_loggers.value.split(' ')[0]
@@ -49,36 +71,48 @@ def fleak_main(page: ft.Page):
             m = '60:77:71:22:C9:B3'
         rue(_ble_connect(m))
 
-    def gui_disconnect(_): rue(_ble_disconnect())
-    def gui_cmd_bat(_): rue(_ble_cmd_bat())
-    def gui_cmd_stp(_): rue(_ble_cmd_stp())
-    def gui_cmd_led(_): rue(_ble_cmd_led())
-    def gui_cmd_run(_): rue(_ble_cmd_run())
+    def click_btn_disconnect(_): rue(_ble_disconnect())
+    def click_btn_cmd_stp(_): rue(_ble_cmd_stp())
+    def click_btn_cmd_led(_): rue(_ble_cmd_led())
+    def click_btn_cmd_run(_): rue(_ble_cmd_run())
+    def click_btn_cmd_gdo(_): rue(_ble_cmd_gdo())
 
-    def gui_cmd_sts(_):
-        # todo > maybe do this is connected check everythere
-        rue(_ble_is_connected())
+    def click_btn_cmd_sts(_):
+
+        # todo > maybe do this everywhere
+        if not rue(_ble_is_connected()):
+            return
+
         rue(_ble_cmd_sts())
+        _t('logger time before sync')
+        rue(_ble_cmd_gtm())
+        rue(_ble_cmd_stm())
+        _t('logger time after sync')
+        rue(_ble_cmd_gtm())
+        rue(_ble_cmd_gfv())
+        rue(_ble_cmd_bat())
 
-    def gui_cmd_mts(_):
+    def click_btn_cmd_mts(_):
         rue(_ble_cmd_mts())
         _t('refreshing file dropbox after dummy created')
-        gui_cmd_dir(None)
+        click_btn_cmd_dir(None)
 
-    def gui_cmd_download(_):
+    def click_bnt_cmd_download(_):
         if not dd_files.value:
             return
         rue(_ble_cmd_download(dd_files.value))
 
-    def gui_cmd_delete(_):
+    def click_btn_cmd_delete(_):
         if not dd_files.value:
             return
         rue(_ble_cmd_delete(dd_files.value))
         _t('refreshing file dropbox after deletion')
-        gui_cmd_dir(None)
+        click_btn_cmd_dir(None)
 
-    page.title = "FLET Lowell Instruments BLE console"
-    page.vertical_alignment = ft.MainAxisAlignment.CENTER
+    # -----------------
+    # page HTML layout
+    # -----------------
+
     page.add(
         ft.Row([
             ft.Column([
@@ -91,44 +125,60 @@ def fleak_main(page: ft.Page):
             ], expand=1)
         ], spacing=30, expand=8),
         ft.Row([
-            ft.IconButton(ft.icons.SEARCH, on_click=gui_scan,
+            ft.IconButton(ft.icons.SEARCH,
+                          on_click=click_btn_scan,
                           icon_size=50, icon_color='black',
                           tooltip='look for loggers'),
-            ft.IconButton(ft.icons.BLUETOOTH_CONNECTED, on_click=gui_connect,
+            ft.IconButton(ft.icons.BLUETOOTH_CONNECTED,
+                          on_click=click_btn_connect,
                           icon_size=50, icon_color='lightblue',
                           tooltip='connect to a logger'),
-            ft.IconButton(ft.icons.BLUETOOTH_DISABLED, on_click=gui_disconnect,
+            ft.IconButton(ft.icons.BLUETOOTH_DISABLED,
+                          on_click=click_btn_disconnect,
                           icon_size=50, icon_color='lightblue',
                           tooltip='disconnect from a logger'),
-            ft.IconButton(ft.icons.QUESTION_MARK, on_click=gui_cmd_sts,
+            ft.IconButton(ft.icons.QUESTION_MARK,
+                          on_click=click_btn_cmd_sts,
                           icon_size=50, icon_color='black',
                           tooltip='query logger status'),
-            ft.IconButton(ft.icons.STOP, on_click=gui_cmd_stp,
+            ft.IconButton(ft.icons.STOP,
+                          on_click=click_btn_cmd_stp,
                           icon_size=50, icon_color='red',
                           tooltip='send STOP command to logger'),
-            ft.IconButton(ft.icons.PLAY_ARROW, on_click=gui_cmd_run,
+            ft.IconButton(ft.icons.PLAY_ARROW,
+                          on_click=click_btn_cmd_run,
                           icon_size=50, icon_color='green',
                           tooltip='send RUN command to logger'),
-            ft.IconButton(ft.icons.WORKSPACES_FILLED, on_click=gui_cmd_led,
+            ft.IconButton(ft.icons.WORKSPACES_FILLED,
+                          on_click=click_btn_cmd_led,
                           icon_size=50, icon_color='lightgreen',
                           tooltip='make LED in logger blink'),
-            ft.IconButton(ft.icons.BATTERY_FULL, on_click=gui_cmd_bat,
-                          icon_size=50, icon_color='orange',
-                          tooltip='get logger battery level'),
-            ft.IconButton(ft.icons.LIST_ALT_OUTLINED, on_click=gui_cmd_dir,
+            ft.IconButton(ft.icons.LIST_ALT_OUTLINED,
+                          on_click=click_btn_cmd_dir,
                           icon_size=50, icon_color='grey',
                           tooltip='get list of files in a logger'),
-            ft.IconButton(ft.icons.DOWNLOAD, on_click=gui_cmd_download,
+            ft.IconButton(ft.icons.DOWNLOAD,
+                          on_click=click_bnt_cmd_download,
                           icon_size=50, icon_color='black',
                           tooltip='get file from logger'),
-            ft.IconButton(ft.icons.DELETE, on_click=gui_cmd_delete,
+            ft.IconButton(ft.icons.DELETE,
+                          on_click=click_btn_cmd_delete,
                           icon_size=50, icon_color='red',
                           tooltip='delete file from logger'),
-            ft.IconButton(ft.icons.FILE_UPLOAD, on_click=gui_cmd_mts,
+            ft.IconButton(ft.icons.FILE_UPLOAD,
+                          on_click=click_btn_cmd_mts,
                           icon_size=50, icon_color='black',
                           tooltip='create dummy file in logger'),
+            ft.IconButton(ft.icons.BUBBLE_CHART_OUTLINED,
+                          on_click=click_btn_cmd_gdo,
+                          icon_size=50, icon_color='cyan',
+                          tooltip='do an oxygen measurement'),
         ], alignment=ft.MainAxisAlignment.CENTER, expand=1),
     )
+
+    # ---------------------
+    # Bluetooth functions
+    # ---------------------
 
     async def _ble_scan():
         _det = []
@@ -164,7 +214,22 @@ def fleak_main(page: ft.Page):
     async def _ble_cmd_bat():
         rv = await lc.cmd_bat()
         if rv[0] == 0:
-            _t('BAT: {} mV'.format(rv[1]))
+            _t('battery: {} mV'.format(rv[1]))
+
+    async def _ble_cmd_gfv():
+        rv = await lc.cmd_gfv()
+        if rv[0] == 0:
+            _t('firmware version: {}'.format(rv[1]))
+
+    async def _ble_cmd_gtm():
+        rv = await lc.cmd_gtm()
+        if rv[0] == 0:
+            _t('{}'.format(rv[1]))
+
+    async def _ble_cmd_stm():
+        rv = await lc.cmd_stm()
+        if rv == 0:
+            _t('logger time synced OK')
 
     async def _ble_cmd_dir():
         rv, ls = await lc.cmd_dir()
@@ -188,6 +253,14 @@ def fleak_main(page: ft.Page):
         if rv == 0:
             _t('command LED successful')
 
+    # todo > this is NOT working on FLET console APP, check
+    async def _ble_cmd_gdo():
+        rv = await lc.cmd_gdo()
+        if not rv:
+            _t('sensor DO error')
+        else:
+            _t(str(rv))
+
     async def _ble_cmd_run():
         rv = await lc.cmd_run()
         if rv == 0:
@@ -206,8 +279,8 @@ def fleak_main(page: ft.Page):
     async def _ble_is_connected():
         if await lc.is_connected():
             _t('BLE is connected')
-        else:
-            _t('BLE is not connected')
+            return True
+        _t('BLE is not connected')
 
     async def _ble_cmd_download(file_to_dl):
         name, _, size = file_to_dl.split()
@@ -226,7 +299,7 @@ def fleak_main(page: ft.Page):
             p = p + '/{}'.format(name)
             with open(p, 'wb') as f:
                 f.write(rv[1])
-            open_dlg_file_downloaded(p)
+            _page_open_dlg_file_downloaded(p)
 
     async def _ble_cmd_delete(file_to_rm):
         name, _, size = file_to_rm.split()
@@ -237,6 +310,7 @@ def fleak_main(page: ft.Page):
             _t('error deleting file {}'.format(file_to_rm))
 
 
+# launch FLET app from here or setup.py entry point
 def main():
     ft.app(target=fleak_main,  view=ft.WEB_BROWSER)
 

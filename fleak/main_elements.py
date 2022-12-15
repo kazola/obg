@@ -5,9 +5,9 @@ from mat.ble.bleak.cc26x2r import BleCC26X2
 
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
-rue = loop.run_until_complete
-lc = BleCC26X2()
+lc = BleCC26X2(dbg_ans=True)
 lv = ft.ListView(expand=1, spacing=10, padding=20, auto_scroll=True)
+rue = loop.run_until_complete
 
 
 dd_loggers = ft.Dropdown(

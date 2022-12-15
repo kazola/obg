@@ -49,6 +49,8 @@ def fleak_main(page: ft.Page):
     def gui_disconnect(_): rue(_ble_disconnect())
     def gui_cmd_bat(_): return rue(_ble_cmd_bat())
     def gui_cmd_stp(_): return rue(_ble_cmd_stp())
+    def gui_cmd_led(_): return rue(_ble_cmd_led())
+    def gui_cmd_run(_): return rue(_ble_cmd_run())
     def gui_cmd_sts(_): return rue(_ble_cmd_sts())
 
     def gui_cmd_download(_):
@@ -85,11 +87,17 @@ def fleak_main(page: ft.Page):
             ft.IconButton(ft.icons.STOP, on_click=gui_cmd_stp,
                           icon_size=50, icon_color='red',
                           tooltip='send STOP command to logger'),
+            ft.IconButton(ft.icons.PLAY_ARROW, on_click=gui_cmd_run,
+                          icon_size=50, icon_color='green',
+                          tooltip='send RUN command to logger'),
             ft.IconButton(ft.icons.LIST_ALT_OUTLINED, on_click=gui_cmd_dir,
                           icon_size=50, icon_color='grey',
                           tooltip='get list of files in a logger'),
-            ft.IconButton(ft.icons.BATTERY_FULL, on_click=gui_cmd_bat,
+            ft.IconButton(ft.icons.WORKSPACES_FILLED, on_click=gui_cmd_led,
                           icon_size=50, icon_color='lightgreen',
+                          tooltip='make LED in logger blink'),
+            ft.IconButton(ft.icons.BATTERY_FULL, on_click=gui_cmd_bat,
+                          icon_size=50, icon_color='orange',
                           tooltip='get logger battery level'),
             ft.IconButton(ft.icons.DOWNLOAD, on_click=gui_cmd_download,
                           icon_size=50, icon_color='black',
@@ -144,11 +152,23 @@ def fleak_main(page: ft.Page):
 
     async def _ble_cmd_stp():
         rv = await lc.cmd_stp()
-        _t(rv[1])
+        if rv == 0:
+            _t('command STOP successful')
+
+    async def _ble_cmd_led():
+        rv = await lc.cmd_led()
+        if rv == 0:
+            _t('command LED successful')
+
+    async def _ble_cmd_run():
+        rv = await lc.cmd_run()
+        if rv == 0:
+            _t('command RUN successful')
 
     async def _ble_cmd_sts():
         rv = await lc.cmd_sts()
-        _t(rv[1])
+        s = 'logger is currently {}'.format(rv[1])
+        _t(s)
 
     async def _ble_cmd_download(file_to_dl):
         name, _, size = file_to_dl.split()

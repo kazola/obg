@@ -1,3 +1,4 @@
+import os
 import pathlib
 
 import flet as ft
@@ -16,8 +17,10 @@ from fleak.main_elements import \
 
 def fleak_main(page: ft.Page):
 
-    def open_dlg_file_downloaded():
+    def open_dlg_file_downloaded(p):
         page.dialog = dlg_file_downloaded
+        dlg_file_downloaded.title = ft.Text('file downloaded OK!')
+        dlg_file_downloaded.content = ft.Text('we left it in\n{}'.format(p))
         dlg_file_downloaded.open = True
         page.update()
 
@@ -217,10 +220,13 @@ def fleak_main(page: ft.Page):
             s = 'download complete {}, {} bytes'
             _t(s.format(name, size))
             p = str(pathlib.Path.home())
-            p = p + '/Downloads/{}'.format(name)
+            m = lc.cli.address.replace(':', '-')
+            p = p + '/Downloads/dl_fleak/{}'.format(m)
+            os.makedirs(p, exist_ok=True)
+            p = p + '/{}'.format(name)
             with open(p, 'wb') as f:
                 f.write(rv[1])
-            open_dlg_file_downloaded()
+            open_dlg_file_downloaded(p)
 
     async def _ble_cmd_delete(file_to_rm):
         name, _, size = file_to_rm.split()

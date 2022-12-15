@@ -38,5 +38,6 @@ progress_bar = ft.ProgressBar(
 
 
 dlg_file_downloaded = ft.AlertDialog(
-    title=ft.Text('file downloaded!')
+    title=ft.Text(''),
+    content=ft.Text('')
 )

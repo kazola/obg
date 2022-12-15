@@ -1,3 +1,5 @@
+import pathlib
+
 import flet as ft
 import bleak
 import asyncio
@@ -34,29 +36,43 @@ def fleak_main(page: ft.Page):
         dd_files.value = ''
         dd_files.options = []
         page.update()
-        return rue(_ble_cmd_dir())
+        rue(_ble_cmd_dir())
 
     def gui_connect(_):
         # if not dd_loggers.value:
         #     return
-
         m = dd_loggers.value.split(' ')[0]
         if platform.node() == 'ARCHER':
-            print('epi')
             m = '60:77:71:22:C9:B3'
         rue(_ble_connect(m))
 
     def gui_disconnect(_): rue(_ble_disconnect())
-    def gui_cmd_bat(_): return rue(_ble_cmd_bat())
-    def gui_cmd_stp(_): return rue(_ble_cmd_stp())
-    def gui_cmd_led(_): return rue(_ble_cmd_led())
-    def gui_cmd_run(_): return rue(_ble_cmd_run())
-    def gui_cmd_sts(_): return rue(_ble_cmd_sts())
+    def gui_cmd_bat(_): rue(_ble_cmd_bat())
+    def gui_cmd_stp(_): rue(_ble_cmd_stp())
+    def gui_cmd_led(_): rue(_ble_cmd_led())
+    def gui_cmd_run(_): rue(_ble_cmd_run())
+
+    def gui_cmd_sts(_):
+        # todo > maybe do this is connected check everythere
+        rue(_ble_is_connected())
+        rue(_ble_cmd_sts())
+
+    def gui_cmd_mts(_):
+        rue(_ble_cmd_mts())
+        _t('refreshing file dropbox after dummy created')
+        gui_cmd_dir(None)
 
     def gui_cmd_download(_):
         if not dd_files.value:
             return
-        return rue(_ble_cmd_download(dd_files.value))
+        rue(_ble_cmd_download(dd_files.value))
+
+    def gui_cmd_delete(_):
+        if not dd_files.value:
+            return
+        rue(_ble_cmd_delete(dd_files.value))
+        _t('refreshing file dropbox after deletion')
+        gui_cmd_dir(None)
 
     page.title = "FLET Lowell Instruments BLE console"
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
@@ -90,18 +106,24 @@ def fleak_main(page: ft.Page):
             ft.IconButton(ft.icons.PLAY_ARROW, on_click=gui_cmd_run,
                           icon_size=50, icon_color='green',
                           tooltip='send RUN command to logger'),
-            ft.IconButton(ft.icons.LIST_ALT_OUTLINED, on_click=gui_cmd_dir,
-                          icon_size=50, icon_color='grey',
-                          tooltip='get list of files in a logger'),
             ft.IconButton(ft.icons.WORKSPACES_FILLED, on_click=gui_cmd_led,
                           icon_size=50, icon_color='lightgreen',
                           tooltip='make LED in logger blink'),
             ft.IconButton(ft.icons.BATTERY_FULL, on_click=gui_cmd_bat,
                           icon_size=50, icon_color='orange',
                           tooltip='get logger battery level'),
+            ft.IconButton(ft.icons.LIST_ALT_OUTLINED, on_click=gui_cmd_dir,
+                          icon_size=50, icon_color='grey',
+                          tooltip='get list of files in a logger'),
             ft.IconButton(ft.icons.DOWNLOAD, on_click=gui_cmd_download,
                           icon_size=50, icon_color='black',
                           tooltip='get file from logger'),
+            ft.IconButton(ft.icons.DELETE, on_click=gui_cmd_delete,
+                          icon_size=50, icon_color='red',
+                          tooltip='delete file from logger'),
+            ft.IconButton(ft.icons.FILE_UPLOAD, on_click=gui_cmd_mts,
+                          icon_size=50, icon_color='black',
+                          tooltip='create dummy file in logger'),
         ], alignment=ft.MainAxisAlignment.CENTER, expand=1),
     )
 
@@ -143,6 +165,9 @@ def fleak_main(page: ft.Page):
 
     async def _ble_cmd_dir():
         rv, ls = await lc.cmd_dir()
+        if ls == 'error':
+            _t('to list files, logger must be stopped')
+            return
         for filename, size in ls.items():
             v = filename + ' - ' + str(size)
             o = ft.dropdown.Option(v)
@@ -165,10 +190,21 @@ def fleak_main(page: ft.Page):
         if rv == 0:
             _t('command RUN successful')
 
+    async def _ble_cmd_mts():
+        rv = await lc.cmd_mts()
+        if rv == 0:
+            _t('command MTS successful')
+
     async def _ble_cmd_sts():
         rv = await lc.cmd_sts()
         s = 'logger is currently {}'.format(rv[1])
         _t(s)
+
+    async def _ble_is_connected():
+        if await lc.is_connected():
+            _t('BLE is connected')
+        else:
+            _t('BLE is not connected')
 
     async def _ble_cmd_download(file_to_dl):
         name, _, size = file_to_dl.split()
@@ -180,9 +216,19 @@ def fleak_main(page: ft.Page):
         if rv[0] == 0:
             s = 'download complete {}, {} bytes'
             _t(s.format(name, size))
-            with open('_dl_files/{}'.format(name), 'wb') as f:
+            p = str(pathlib.Path.home())
+            p = p + '/Downloads/{}'.format(name)
+            with open(p, 'wb') as f:
                 f.write(rv[1])
             open_dlg_file_downloaded()
+
+    async def _ble_cmd_delete(file_to_rm):
+        name, _, size = file_to_rm.split()
+        rv = await lc.cmd_del(name)
+        if rv == 0:
+            _t('file {} deleted OK'.format(file_to_rm))
+        else:
+            _t('error deleting file {}'.format(file_to_rm))
 
 
 def main():

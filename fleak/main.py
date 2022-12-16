@@ -34,7 +34,7 @@ def fleak_main(page: ft.Page):
                 # _u: b'state_dds_ble_download_progress/55.943275601534346'
                 v = _u.split(b'/')
                 if v[0] == b'state_dds_ble_download_progress':
-                    p = float(v.decode()) / 100
+                    p = float(v[1].decode()) / 100
                     progress_bar.controls[1].value = p
                     page.update()
                 elif v[0] == b'bye_thread':
@@ -51,12 +51,16 @@ def fleak_main(page: ft.Page):
     # page dialogs and events
     # -------------------------
     def _page_on_tab_close(_):
-        click_btn_disconnect(None)
-        _sk = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        _sk.sendto(b'bye_thread', ('127.0.0.1', PORT_PROGRESS_BAR))
-        print('sent: closing progress bar thread')
-        page.window_destroy()
-        os._exit(0)
+        try:
+            click_btn_disconnect(None)
+            _sk = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            _sk.sendto(b'bye_thread', ('127.0.0.1', PORT_PROGRESS_BAR))
+            print('sent: closing progress bar thread')
+            page.window_destroy()
+            os._exit(0)
+        except (Exception, ):
+            # I don't care
+            os._exit(0)
 
     def _page_on_error(e):
         print(e)
@@ -374,7 +378,9 @@ def fleak_main(page: ft.Page):
 
 # launch FLET app from here or setup.py entry point
 def main():
-    ft.app(target=fleak_main,  view=ft.WEB_BROWSER)
+    # ft.app(target=fleak_main,  view=ft.WEB_BROWSER)
+    ft.app(target=fleak_main)
+
 
 
 if __name__ == '__main__':

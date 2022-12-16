@@ -91,7 +91,7 @@ def fleak_main(page: ft.Page):
         dev = platform.node() == 'ARCHER'
         if not dd_loggers.value and not dev:
             return
-        if not dev:
+        if dev:
             _t('detected ARCHER laptop, forcing mac')
             m = '60:77:71:22:C9:B3'
         else:

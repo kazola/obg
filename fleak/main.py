@@ -32,10 +32,14 @@ def fleak_main(page: ft.Page):
             try:
                 _u, addr = _sk.recvfrom(1024)
                 # _u: b'state_dds_ble_download_progress/55.943275601534346'
-                v = _u.split(b'/')[1]
-                v = float(v.decode()) / 100
-                progress_bar.controls[1].value = v
-                page.update()
+                v = _u.split(b'/')
+                if v[0] == b'state_dds_ble_download_progress':
+                    p = float(v.decode()) / 100
+                    progress_bar.controls[1].value = p
+                    page.update()
+                elif v[0] == b'bye_thread':
+                    print('received: closing progress bar thread')
+                    break
             except TimeoutError:
                 pass
 
@@ -48,7 +52,11 @@ def fleak_main(page: ft.Page):
     # -------------------------
     def _page_on_tab_close(_):
         click_btn_disconnect(None)
+        _sk = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        _sk.sendto(b'bye_thread', ('127.0.0.1', PORT_PROGRESS_BAR))
+        print('sent: closing progress bar thread')
         page.window_destroy()
+        os._exit(0)
 
     def _page_on_error(e):
         print(e)

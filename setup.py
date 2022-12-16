@@ -8,7 +8,7 @@ with open('requirements.txt', 'r') as f:
 
 setup(
     name='fleak',
-    version='0.8.412',
+    version='0.8.413',
     description='Web App to interact with Lowell Instruments loggers',
     url='https://github.com/LowellInstruments/fleak',
     author='Lowell Instruments',

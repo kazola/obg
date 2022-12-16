@@ -27,6 +27,7 @@ def fleak_main(page: ft.Page):
         _sk.settimeout(1)
         _sk.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         _sk.bind(('127.0.0.1', PORT_PROGRESS_BAR))
+        # todo > destroy this when all is destroyed otherwise it pends
         while 1:
             try:
                 _u, addr = _sk.recvfrom(1024)
@@ -47,6 +48,7 @@ def fleak_main(page: ft.Page):
     # -------------------------
     def _page_on_tab_close(_):
         click_btn_disconnect(None)
+        page.window_destroy()
 
     def _page_on_error(e):
         print(e)

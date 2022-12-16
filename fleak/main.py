@@ -88,11 +88,15 @@ def fleak_main(page: ft.Page):
         rue(_ble_cmd_dir())
 
     def click_btn_connect(_):
-        # if not dd_loggers.value:
-        #     return
-        m = dd_loggers.value.split(' ')[0]
-        if platform.node() == 'ARCHER':
+        dev = platform.node() == 'ARCHER'
+        if not dd_loggers.value and not dev:
+            return
+        if not dev:
+            _t('detected ARCHER laptop, forcing mac')
             m = '60:77:71:22:C9:B3'
+        else:
+            # normal user
+            m = dd_loggers.value.split(' ')[0]
         rue(_ble_connect(m))
 
     def click_btn_disconnect(_): rue(_ble_disconnect())
@@ -208,6 +212,13 @@ def fleak_main(page: ft.Page):
         _det = []
 
         def _scan_cb(d: BLEDevice, _):
+            if d.name not in [
+                'DO-2',
+                'DO-1',
+                'TAP'
+            ]:
+                return
+
             if d.name not in _det:
                 _det.append(d.name)
                 s = d.address + '   ' + d.name

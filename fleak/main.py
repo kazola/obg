@@ -1,5 +1,8 @@
 import os
 import pathlib
+import socket
+import threading
+import time
 
 import flet as ft
 import bleak
@@ -12,15 +15,36 @@ from fleak.main_elements import \
     dd_files, \
     lv, \
     lc, \
-    progress_bar, dlg_file_downloaded
+    progress_bar, dlg_file_downloaded, progress_bar_container
+
+PORT_PROGRESS_BAR = 56142
 
 
 def fleak_main(page: ft.Page):
 
+    def _progress_bar_display():
+        _sk = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        _sk.settimeout(1)
+        _sk.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        _sk.bind(('127.0.0.1', PORT_PROGRESS_BAR))
+        while 1:
+            try:
+                _u, addr = _sk.recvfrom(1024)
+                # _u: b'state_dds_ble_download_progress/55.943275601534346'
+                v = _u.split(b'/')[1]
+                v = float(v.decode()) / 100
+                progress_bar.controls[1].value = v
+                page.update()
+            except TimeoutError:
+                pass
+
+    # for download progress
+    th = threading.Thread(target=_progress_bar_display)
+    th.start()
+
     # -------------------------
     # page dialogs and events
     # -------------------------
-
     def _page_on_tab_close(_):
         click_btn_disconnect(None)
 
@@ -118,7 +142,7 @@ def fleak_main(page: ft.Page):
             ft.Column([
                 dd_loggers,
                 dd_files,
-                progress_bar
+                progress_bar_container
             ], expand=1),
             ft.Column([
                 lv
@@ -277,18 +301,33 @@ def fleak_main(page: ft.Page):
         _t(s)
 
     async def _ble_is_connected():
-        if await lc.is_connected():
-            _t('BLE is connected')
-            return True
-        _t('BLE is not connected')
+        if not await lc.is_connected():
+            _t('BLE is not connected')
 
     async def _ble_cmd_download(file_to_dl):
         name, _, size = file_to_dl.split()
         size = int(size)
+
         rv = await lc.cmd_dwg(name)
         if rv != 0:
             _t('error DWG')
-        rv = await lc.cmd_dwl(size)
+
+        progress_bar.value = 0
+        progress_bar.visible = True
+        page.update()
+
+        _t_dl = time.perf_counter()
+        ip = '127.0.0.1'
+        port = PORT_PROGRESS_BAR
+        rv = await lc.cmd_dwl(size,ip, port)
+        elapsed_time = time.perf_counter() - _t_dl
+        speed = (size / elapsed_time) / 1000
+        _t('speed {:.2f} KBps'.format(speed))
+
+        progress_bar.visible = False
+        page.update()
+
+        # save file locally
         if rv[0] == 0:
             s = 'download complete {}, {} bytes'
             _t(s.format(name, size))

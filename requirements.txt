@@ -1,6 +1,9 @@
 # when developing
 flet>=0.1.33
-bleak
-numpy
-pandas
-h5py
+bleak~=0.19.5
+numpy~=1.23.5
+pandas~=1.5.2
+h5py~=3.7.0
+humanize~=4.4.0
+
+# plus, in pycharm add lowell-mat dependency

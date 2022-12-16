@@ -1,6 +1,11 @@
 from setuptools import setup, find_packages
 
 
+with open('requirements.txt', 'r') as f:
+    my_reqs = [i for i in f.readlines() if '=' in i]
+    my_reqs.append('lowell-mat@git+https://github.com/lowellinstruments/lowell-mat.git@poor')
+
+
 setup(
     name='fleak',
     version='0.8.412',
@@ -15,13 +20,5 @@ setup(
         ],
     },
     packages=find_packages(),
-    install_requires=[
-        'flet>=0.1.33',
-        'bleak',
-        'numpy',
-        'pandas',
-        'h5py',
-        'humanize',
-        'lowell-mat@git+https://github.com/lowellinstruments/lowell-mat.git@poor'
-    ]
+    install_requires=my_reqs
 )

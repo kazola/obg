@@ -303,6 +303,8 @@ def fleak_main(page: ft.Page):
     async def _ble_is_connected():
         if not await lc.is_connected():
             _t('BLE is not connected')
+            return
+        return True
 
     async def _ble_cmd_download(file_to_dl):
         name, _, size = file_to_dl.split()

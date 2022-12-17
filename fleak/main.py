@@ -3,7 +3,6 @@ import pathlib
 import socket
 import threading
 import time
-
 import flet as ft
 import bleak
 import asyncio
@@ -17,6 +16,7 @@ from fleak.main_elements import \
     lc, \
     progress_bar, dlg_file_downloaded, progress_bar_container
 
+
 PORT_PROGRESS_BAR = 56142
 
 
@@ -24,32 +24,36 @@ def fleak_main(page: ft.Page):
 
     def _progress_bar_display():
         _sk = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        _sk.settimeout(1)
+        _sk.settimeout(.5)
         _sk.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         _sk.bind(('127.0.0.1', PORT_PROGRESS_BAR))
-        # todo > destroy this when all is destroyed otherwise it pends
+
         while 1:
             try:
                 _u, addr = _sk.recvfrom(1024)
-                # _u: b'state_dds_ble_download_progress/55.943275601534346'
                 v = _u.split(b'/')
+
+                # parse UDP frame sent by lowell-mat
                 if v[0] == b'state_dds_ble_download_progress':
                     p = float(v[1].decode()) / 100
                     progress_bar.controls[1].value = p
                     page.update()
+
+                # parse UDP frame same from this same app
                 elif v[0] == b'bye_thread':
                     print('received: closing progress bar thread')
                     break
+
             except TimeoutError:
                 pass
 
-    # for download progress
+    # for asynchronous download progress par
     th = threading.Thread(target=_progress_bar_display)
     th.start()
 
-    # -------------------------
-    # page dialogs and events
-    # -------------------------
+    # -----------------------------------------
+    # PAGE dialogs and events
+    # -----------------------------------------
     def _page_on_tab_close(_):
         try:
             click_btn_disconnect(None)
@@ -57,9 +61,10 @@ def fleak_main(page: ft.Page):
             _sk.sendto(b'bye_thread', ('127.0.0.1', PORT_PROGRESS_BAR))
             print('sent: closing progress bar thread')
             page.window_destroy()
-            os._exit(0)
         except (Exception, ):
-            # I don't care
+            # I don't care anymore
+            pass
+        finally:
             os._exit(0)
 
     def _page_on_error(e):
@@ -70,7 +75,7 @@ def fleak_main(page: ft.Page):
     page.title = "FLET Lowell Instruments BLE console"
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
 
-    def _page_open_dlg_file_downloaded(p):
+    def _page_show_dlg_file_downloaded(p):
         page.dialog = dlg_file_downloaded
         dlg_file_downloaded.title = ft.Text('file downloaded OK!')
         dlg_file_downloaded.content = ft.Text('we left it in\n{}'.format(p))
@@ -85,9 +90,9 @@ def fleak_main(page: ft.Page):
     def _t(s):
         _page_trace(s)
 
-    # ------------------------
-    # page icon button clicks
-    # ------------------------
+    # ----------------------------------------------------
+    # PAGE icon button clicks
+    # ----------------------------------------------------
 
     def click_btn_scan(_):
         dd_loggers.value = ''
@@ -126,10 +131,10 @@ def fleak_main(page: ft.Page):
             return
 
         rue(_ble_cmd_sts())
-        _t('logger time before sync')
+        _t('logger datetime before sync')
         rue(_ble_cmd_gtm())
         rue(_ble_cmd_stm())
-        _t('logger time after sync')
+        _t('logger datetime after sync')
         rue(_ble_cmd_gtm())
         rue(_ble_cmd_gfv())
         rue(_ble_cmd_bat())
@@ -302,7 +307,6 @@ def fleak_main(page: ft.Page):
         if rv == 0:
             _t('command LED successful')
 
-    # todo > this is NOT working on FLET console APP, check
     async def _ble_cmd_gdo():
         rv = await lc.cmd_gdo()
         if not rv:
@@ -332,55 +336,56 @@ def fleak_main(page: ft.Page):
         return True
 
     async def _ble_cmd_download(file_to_dl):
-        name, _, size = file_to_dl.split()
-        size = int(size)
+        filename, _, size = file_to_dl.split()
 
-        rv = await lc.cmd_dwg(name)
+        rv = await lc.cmd_dwg(filename)
         if rv != 0:
             _t('error DWG')
+            return
 
+        # -----------------------------
+        # progress bar & download file
+        # -----------------------------
+        _t_dl = time.perf_counter()
         progress_bar.value = 0
         progress_bar.visible = True
         page.update()
-
-        _t_dl = time.perf_counter()
         ip = '127.0.0.1'
         port = PORT_PROGRESS_BAR
-        rv = await lc.cmd_dwl(size,ip, port)
+        size = int(size)
+        rv = await lc.cmd_dwl(size, ip, port)
         elapsed_time = time.perf_counter() - _t_dl
         speed = (size / elapsed_time) / 1000
         _t('speed {:.2f} KBps'.format(speed))
-
         progress_bar.visible = False
         page.update()
 
         # save file locally
         if rv[0] == 0:
             s = 'download complete {}, {} bytes'
-            _t(s.format(name, size))
+            _t(s.format(filename, size))
             p = str(pathlib.Path.home())
             m = lc.cli.address.replace(':', '-')
             p = p + '/Downloads/dl_fleak/{}'.format(m)
             os.makedirs(p, exist_ok=True)
-            p = p + '/{}'.format(name)
+            p = p + '/{}'.format(filename)
             with open(p, 'wb') as f:
                 f.write(rv[1])
-            _page_open_dlg_file_downloaded(p)
+            _page_show_dlg_file_downloaded(p)
 
-    async def _ble_cmd_delete(file_to_rm):
-        name, _, size = file_to_rm.split()
+    async def _ble_cmd_delete(f):
+        name, _, __ = f.split()
         rv = await lc.cmd_del(name)
         if rv == 0:
-            _t('file {} deleted OK'.format(file_to_rm))
+            _t('file {} deleted OK'.format(f))
         else:
-            _t('error deleting file {}'.format(file_to_rm))
+            _t('error deleting file {}'.format(f))
 
 
-# launch FLET app from here or setup.py entry point
+# run app either from here or from setup.py entry point
 def main():
     # ft.app(target=fleak_main,  view=ft.WEB_BROWSER)
     ft.app(target=fleak_main)
-
 
 
 if __name__ == '__main__':

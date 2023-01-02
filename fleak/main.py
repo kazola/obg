@@ -161,65 +161,80 @@ def fleak_main(page: ft.Page):
     # -----------------
 
     page.add(
+
         ft.Row([
             ft.Column([
                 dd_loggers,
                 dd_files,
                 progress_bar_container
             ], expand=1),
+
             ft.Column([
                 lv
             ], expand=1)
         ], spacing=30, expand=8),
+
         ft.Row([
-            ft.IconButton(ft.icons.SEARCH,
-                          on_click=click_btn_scan,
-                          icon_size=50, icon_color='black',
-                          tooltip='look for loggers'),
-            ft.IconButton(ft.icons.BLUETOOTH_CONNECTED,
-                          on_click=click_btn_connect,
-                          icon_size=50, icon_color='lightblue',
-                          tooltip='connect to a logger'),
-            ft.IconButton(ft.icons.BLUETOOTH_DISABLED,
-                          on_click=click_btn_disconnect,
-                          icon_size=50, icon_color='lightblue',
-                          tooltip='disconnect from a logger'),
-            ft.IconButton(ft.icons.QUESTION_MARK,
-                          on_click=click_btn_cmd_sts,
-                          icon_size=50, icon_color='black',
-                          tooltip='query logger status'),
-            ft.IconButton(ft.icons.STOP,
-                          on_click=click_btn_cmd_stp,
-                          icon_size=50, icon_color='red',
-                          tooltip='send STOP command to logger'),
-            ft.IconButton(ft.icons.PLAY_ARROW,
-                          on_click=click_btn_cmd_run,
-                          icon_size=50, icon_color='green',
-                          tooltip='send RUN command to logger'),
-            ft.IconButton(ft.icons.WORKSPACES_FILLED,
-                          on_click=click_btn_cmd_led,
-                          icon_size=50, icon_color='lightgreen',
-                          tooltip='make LED in logger blink'),
-            ft.IconButton(ft.icons.LIST_ALT_OUTLINED,
-                          on_click=click_btn_cmd_dir,
-                          icon_size=50, icon_color='grey',
-                          tooltip='get list of files in a logger'),
-            ft.IconButton(ft.icons.DOWNLOAD,
-                          on_click=click_bnt_cmd_download,
-                          icon_size=50, icon_color='black',
-                          tooltip='get file from logger'),
-            ft.IconButton(ft.icons.DELETE,
-                          on_click=click_btn_cmd_delete,
-                          icon_size=50, icon_color='red',
-                          tooltip='delete file from logger'),
-            ft.IconButton(ft.icons.FILE_UPLOAD,
-                          on_click=click_btn_cmd_mts,
-                          icon_size=50, icon_color='black',
-                          tooltip='create dummy file in logger'),
-            ft.IconButton(ft.icons.BUBBLE_CHART_OUTLINED,
-                          on_click=click_btn_cmd_gdo,
-                          icon_size=50, icon_color='cyan',
-                          tooltip='do an oxygen measurement'),
+            ft.IconButton(
+                ft.icons.SEARCH,
+                on_click=click_btn_scan,
+                icon_size=50, icon_color='black',
+                tooltip='look for loggers'),
+            ft.IconButton(
+                ft.icons.BLUETOOTH_CONNECTED,
+                on_click=click_btn_connect,
+                icon_size=50, icon_color='lightblue',
+                tooltip='connect to a logger'),
+            ft.IconButton(
+                ft.icons.BLUETOOTH_DISABLED,
+                on_click=click_btn_disconnect,
+                icon_size=50, icon_color='lightblue',
+                tooltip='disconnect from a logger'),
+            ft.IconButton(
+                ft.icons.QUESTION_MARK,
+                on_click=click_btn_cmd_sts,
+                icon_size=50, icon_color='black',
+                tooltip='query logger status'),
+            ft.IconButton(
+                ft.icons.STOP,
+                on_click=click_btn_cmd_stp,
+                icon_size=50, icon_color='red',
+                tooltip='send STOP command to logger'),
+            ft.IconButton(
+                ft.icons.PLAY_ARROW,
+                on_click=click_btn_cmd_run,
+                icon_size=50, icon_color='green',
+                tooltip='send RUN command to logger'),
+            ft.IconButton(
+                ft.icons.WORKSPACES_FILLED,
+                on_click=click_btn_cmd_led,
+                icon_size=50, icon_color='lightgreen',
+                tooltip='make LED in logger blink'),
+            ft.IconButton(
+                ft.icons.LIST_ALT_OUTLINED,
+                on_click=click_btn_cmd_dir,
+                icon_size=50, icon_color='grey',
+                tooltip='get list of files in a logger'),
+            ft.IconButton(
+                ft.icons.DOWNLOAD,
+                on_click=click_bnt_cmd_download,
+                icon_size=50, icon_color='black',
+                tooltip='get file from logger'),
+            ft.IconButton(
+                ft.icons.DELETE,
+                on_click=click_btn_cmd_delete,
+                icon_size=50, icon_color='red',
+                tooltip='delete file from logger'),
+            ft.IconButton(
+                ft.icons.FILE_UPLOAD,
+                on_click=click_btn_cmd_mts,
+                icon_size=50, icon_color='black',
+                tooltip='create dummy file in logger'),
+            ft.IconButton(
+                ft.icons.BUBBLE_CHART_OUTLINED,
+                on_click=click_btn_cmd_gdo,
+                icon_size=50, icon_color='cyan',
+                tooltip='do an oxygen measurement'),
         ], alignment=ft.MainAxisAlignment.CENTER, expand=1),
     )
 
@@ -231,11 +246,12 @@ def fleak_main(page: ft.Page):
         _det = []
 
         def _scan_cb(d: BLEDevice, _):
-            if d.name not in [
+            logger_accepted_types = [
                 'DO-2',
                 'DO-1',
                 'TAP'
-            ]:
+            ]
+            if d.name not in logger_accepted_types:
                 return
 
             if d.name not in _det:
@@ -382,7 +398,7 @@ def fleak_main(page: ft.Page):
             _t('error deleting file {}'.format(f))
 
 
-# run app either from here or from setup.py entry point
+# app can run from here OR setup.py entry point 'fleak'
 def main():
     # ft.app(target=fleak_main,  view=ft.WEB_BROWSER)
     ft.app(target=fleak_main)

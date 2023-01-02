@@ -1,2 +1,2 @@
 0.8.412 -> first version
-0.8.413 -> added logger types filtering
+0.8.413 -> added filtering: logger_accepted_types

@@ -14,15 +14,17 @@ from fleak.main_elements import \
     dd_files, \
     lv, \
     lc, \
-    progress_bar, dlg_file_downloaded, progress_bar_container
+    progress_bar, \
+    dlg_file_downloaded, \
+    progress_bar_container
 
 
 PORT_PROGRESS_BAR = 56142
 
 
-def fleak_main(page: ft.Page):
+def _main(page: ft.Page):
 
-    def _progress_bar_display():
+    def _th_fxn_progress_bar_display():
         _sk = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         _sk.settimeout(.5)
         _sk.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -30,6 +32,9 @@ def fleak_main(page: ft.Page):
 
         while 1:
             try:
+                # -----------------------
+                # receive orders via UDP
+                # -----------------------
                 _u, addr = _sk.recvfrom(1024)
                 v = _u.split(b'/')
 
@@ -42,13 +47,13 @@ def fleak_main(page: ft.Page):
                 # parse UDP frame same from this same app
                 elif v[0] == b'bye_thread':
                     print('received: closing progress bar thread')
-                    break
+                    return
 
             except TimeoutError:
                 pass
 
-    # for asynchronous download progress par
-    th = threading.Thread(target=_progress_bar_display)
+    # create thread
+    th = threading.Thread(target=_th_fxn_progress_bar_display)
     th.start()
 
     # -----------------------------------------
@@ -56,14 +61,17 @@ def fleak_main(page: ft.Page):
     # -----------------------------------------
     def _page_on_tab_close(_):
         try:
+            # bye me and bye thread
             click_btn_disconnect(None)
             _sk = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             _sk.sendto(b'bye_thread', ('127.0.0.1', PORT_PROGRESS_BAR))
             print('sent: closing progress bar thread')
             page.window_destroy()
+
         except (Exception, ):
-            # I don't care anymore
+            # whatever, I don't care anymore
             pass
+
         finally:
             os._exit(0)
 
@@ -76,6 +84,7 @@ def fleak_main(page: ft.Page):
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
 
     def _page_show_dlg_file_downloaded(p):
+        # this gets called at the end of BLE download
         page.dialog = dlg_file_downloaded
         dlg_file_downloaded.title = ft.Text('file downloaded OK!')
         dlg_file_downloaded.content = ft.Text('we left it in\n{}'.format(p))
@@ -91,7 +100,7 @@ def fleak_main(page: ft.Page):
         _page_trace(s)
 
     # ----------------------------------------------------
-    # PAGE icon button clicks
+    # PAGE icon GUI button clicks
     # ----------------------------------------------------
 
     def click_btn_scan(_):
@@ -114,7 +123,7 @@ def fleak_main(page: ft.Page):
             _t('detected ARCHER laptop, forcing mac')
             m = '60:77:71:22:C9:B3'
         else:
-            # normal user
+            # normal use-case
             m = dd_loggers.value.split(' ')[0]
         rue(_ble_connect(m))
 
@@ -369,6 +378,8 @@ def fleak_main(page: ft.Page):
         ip = '127.0.0.1'
         port = PORT_PROGRESS_BAR
         size = int(size)
+
+        # internally, this sends UDP flags
         rv = await lc.cmd_dwl(size, ip, port)
         elapsed_time = time.perf_counter() - _t_dl
         speed = (size / elapsed_time) / 1000
@@ -400,8 +411,8 @@ def fleak_main(page: ft.Page):
 
 # app can run from here OR setup.py entry point 'fleak'
 def main():
-    # ft.app(target=fleak_main,  view=ft.WEB_BROWSER)
-    ft.app(target=fleak_main)
+    ft.app(target=_main)
+    # ft.app(target=_main,  view=ft.WEB_BROWSER)
 
 
 if __name__ == '__main__':

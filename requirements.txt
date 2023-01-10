@@ -12,8 +12,9 @@ numpy~=1.21.6
 pandas~=1.3.5
 
 
-
-h5py~=3.7.0
+# this fails on windows
+# h5py~=3.7.0
+h5py
 humanize~=4.4.0
 
 # plus, in pycharm add lowell-mat dependency

@@ -1,7 +1,7 @@
 # when developing
 flet>=0.1.33
 bleak~=0.19.5
-numpy~=1.23.5
+numpy~=1.21.6
 pandas~=1.5.2
 h5py~=3.7.0
 humanize~=4.4.0

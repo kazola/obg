@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 # ugly but, meh
 with open('requirements.txt', 'r') as f:
     my_reqs = [i for i in f.readlines() if '=' in i]
-    my_reqs.append('lowell-mat@git+https://github.com/lowellinstruments/lowell-mat.git@poor')
+    my_reqs.append('lowell-mat@git+https://github.com/lowellinstruments/lowell-mat.git@v4')
 
 
 setup(

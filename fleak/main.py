@@ -17,7 +17,7 @@ from fleak.main_elements import \
     progress_bar, \
     dlg_file_downloaded, \
     progress_bar_container
-
+from settings.ctx import hook_ble_scan_simulated_loggers, hook_ble_hardcoded_mac_to_connect
 
 PORT_PROGRESS_BAR = 56142
 
@@ -116,14 +116,20 @@ def _main(page: ft.Page):
         rue(_ble_cmd_dir())
 
     def click_btn_connect(_):
-        dev = platform.node() == 'ARCHER'
-        if not dd_loggers.value and not dev:
+        if hook_ble_scan_simulated_loggers:
+            _t('detected simulation setting, forcing fake mac')
+            m = '11:22:33:44:55:66'
+            rue(_ble_connect(m))
             return
-        if dev:
+
+        hardcoded_mac = hook_ble_hardcoded_mac_to_connect
+        if not dd_loggers.value and not hardcoded_mac:
+            return
+        if hardcoded_mac:
             _t('detected ARCHER laptop, forcing mac')
-            m = '60:77:71:22:C9:B3'
+            m = hardcoded_mac
         else:
-            # normal use-case
+            _t('detected normal mac to connect')
             m = dd_loggers.value.split(' ')[0]
         rue(_ble_connect(m))
 
@@ -272,9 +278,16 @@ def _main(page: ft.Page):
 
         print('scanning...')
         try:
+            if hook_ble_scan_simulated_loggers:
+                s = '11:22:33:44:55:66   DO-2'
+                dd_loggers.options.append(ft.dropdown.Option(s))
+                dd_loggers.value = s
+                page.update()
+                return
+
             scanner = bleak.BleakScanner(_scan_cb, None)
             await scanner.start()
-            await asyncio.sleep(5)
+            await asyncio.sleep(1)
             await scanner.stop()
 
         except (asyncio.TimeoutError, BleakError, OSError) as ex:

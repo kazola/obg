@@ -1,13 +1,18 @@
 import flet as ft
 import asyncio
 from mat.ble.bleak.cc26x2r import BleCC26X2
+from mat.ble.bleak.cc26x2r_sim import BleCC26X2Sim
+from settings.ctx import hook_ble_scan_simulated_loggers
 
 
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
-lc = BleCC26X2(dbg_ans=False)
 lv = ft.ListView(expand=1, spacing=10, padding=20, auto_scroll=True)
 rue = loop.run_until_complete
+if hook_ble_scan_simulated_loggers:
+    lc = BleCC26X2Sim(dbg_ans=False)
+else:
+    lc = BleCC26X2()
 
 
 dd_loggers = ft.Dropdown(

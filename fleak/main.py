@@ -405,7 +405,11 @@ def _main(page: ft.Page):
             s = 'download complete {}, {} bytes'
             _t(s.format(filename, size))
             p = str(pathlib.Path.home())
-            m = lc.cli.address.replace(':', '-')
+            if hook_ble_scan_simulated_loggers:
+                m = '11-22-33-44-55-66'
+            else:
+                m = lc.cli.address.replace(':', '-')
+
             p = p + '/Downloads/dl_fleak/{}'.format(m)
             os.makedirs(p, exist_ok=True)
             p = p + '/{}'.format(filename)

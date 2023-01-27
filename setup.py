@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
 
 
-# ugly but, meh
-with open('requirements.txt', 'r') as f:
-    my_reqs = [i for i in f.readlines() if '=' in i]
-    my_reqs.append('lowell-mat@git+https://github.com/lowellinstruments/lowell-mat.git@v4')
+# grab packages from requirements files
+with open('requirements311.txt') as f:
+    rr = f.readlines()
+
 
 
 setup(
@@ -22,5 +22,5 @@ setup(
     },
     packages=find_packages(),
     # defined at top of this file
-    install_requires=my_reqs
+    install_requires=rr
 )

@@ -3,7 +3,7 @@ echo; echo; echo
 
 
 # -----------------------------------------------------------------------
-# curl https://raw.githubusercontent.com/LowellInstruments/fleak/master/settings/installer_fleak.sh | bash
+# curl -L https://raw.githubusercontent.com/LowellInstruments/fleak/master/settings/installer_fleak.sh | bash
 # -----------------------------------------------------------------------
 
 

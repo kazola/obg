@@ -26,7 +26,7 @@ _e $? 'error creating fleak virtual environment\n'
 
 printf '> step 2) Installing MAT library'
 git clone https://github.com/lowellinstruments/lowell-mat.git -b v4
-cd lowell-mat && export MY_IGNORE_REQUIREMENTS_TXT=1 && pip install . -v
+cd lowell-mat && export MY_IGNORE_REQUIREMENTS_TXT=1 && pip install .
 _e $? 'error installing MAT library\n'
 
 
@@ -35,6 +35,6 @@ pip install git+https://github.com/lowellinstruments/fleak.git
 _e $? 'error installing fleak\n'
 
 
-printf '> done! now you type the following to run the fleak GUI'
-printf 'source venv_fleak/bin/activate'
-printf 'fleak'
+printf '> done! now you type the following to run the fleak GUI\n'
+printf 'source venv_fleak/bin/activate\n'
+printf 'fleak\n'

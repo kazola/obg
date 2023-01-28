@@ -25,13 +25,11 @@ _e $? 'error creating fleak virtual environment\n'
 
 
 printf '> step 2) Installing MAT library'
-git clone https://github.com/lowellinstruments/lowell-mat.git -b v4
-cd lowell-mat && export MY_IGNORE_REQUIREMENTS_TXT=1 && pip install .
-rm -rf lowell-mat
+pip install git+https://github.com/lowellinstruments/lowell-mat.git@v4
 _e $? 'error installing MAT library\n'
 
 
-printf '> step 3) Cloning repository fleak\n'
+printf '> step 3) Installing fleak\n'
 pip install git+https://github.com/lowellinstruments/fleak.git
 _e $? 'error installing fleak\n'
 

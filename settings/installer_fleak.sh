@@ -8,7 +8,7 @@ echo; echo; echo
 
 
 printf '> CURL installer for Lowell Instruments FLEAK GUI console\n'
-printf '> step 1) Creating virtual env'
+printf '> step 1) Creating virtual env\n'
 rm -rf venv_fleak
 python3 -m venv venv_fleak
 source venv_fleak/bin/activate

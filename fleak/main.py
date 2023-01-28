@@ -17,7 +17,7 @@ from fleak.main_elements import \
     progress_bar, \
     dlg_file_downloaded, \
     progress_bar_container
-from settings.ctx import hook_ble_scan_simulated_loggers, hook_ble_hardcoded_mac_to_connect
+from fleak.settings.ctx import hook_ble_scan_simulated_loggers, hook_ble_hardcoded_mac_to_connect
 
 PORT_PROGRESS_BAR = 56142
 

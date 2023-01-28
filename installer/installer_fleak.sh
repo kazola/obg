@@ -19,10 +19,19 @@ if [ "$rv" -ne 0 ]; then
 fi
 
 
-printf '> step 2) Cloning repository fleak\n'
+printf '> step 2) Installing MAT library'
+
+
+
+printf '> step 3) Cloning repository fleak\n'
 pip install git+https://github.com/lowellinstruments/fleak.git
 rv=$?
 if [ "$rv" -ne 0 ]; then
     printf 'error installing fleak\n'
     exit 1
 fi
+
+
+printf '> done! now you type the following to run the fleak GUI'
+printf 'source venv_fleak/bin/activate'
+printf 'fleak'

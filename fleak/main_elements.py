@@ -2,7 +2,7 @@ import flet as ft
 import asyncio
 from mat.ble.bleak.cc26x2r import BleCC26X2
 from mat.ble.bleak.cc26x2r_sim import BleCC26X2Sim
-from settings.ctx import hook_ble_scan_simulated_loggers
+from fleak.settings.ctx import hook_ble_scan_simulated_loggers
 
 
 loop = asyncio.new_event_loop()

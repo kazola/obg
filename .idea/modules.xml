@@ -2,9 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../ddn/.idea/ddn.iml" filepath="$PROJECT_DIR$/../ddn/.idea/ddn.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../ddt/.idea/ddt.iml" filepath="$PROJECT_DIR$/../ddt/.idea/ddt.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/fleak.iml" filepath="$PROJECT_DIR$/.idea/fleak.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../lowell-mat/.idea/lowell-mat.iml" filepath="$PROJECT_DIR$/../lowell-mat/.idea/lowell-mat.iml" />
     </modules>
   </component>
 </project>

@@ -49,7 +49,7 @@ def _main(page: ft.Page):
                     print('received: closing progress bar thread')
                     return
 
-            except TimeoutError:
+            except (Exception, ):
                 pass
 
     # create thread

@@ -8,7 +8,7 @@ from fleak.settings.ctx import hook_ble_scan_simulated_loggers
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
 lv = ft.ListView(expand=1, spacing=10, padding=20, auto_scroll=True)
-rue = loop.run_until_complete
+ruc = loop.run_until_complete
 if hook_ble_scan_simulated_loggers:
     lc = BleCC26X2Sim(dbg_ans=False)
 else:

@@ -9,7 +9,7 @@ import asyncio
 from bleak import BLEDevice, BleakError
 import platform
 from fleak.main_elements import \
-    rue, \
+    ruc, \
     dd_loggers, \
     dd_files, \
     lv, \
@@ -107,19 +107,19 @@ def _main(page: ft.Page):
         dd_loggers.value = ''
         dd_loggers.options = []
         page.update()
-        rue(_ble_scan())
+        ruc(_ble_scan())
 
     def click_btn_cmd_dir(_):
         dd_files.value = ''
         dd_files.options = []
         page.update()
-        rue(_ble_cmd_dir())
+        ruc(_ble_cmd_dir())
 
     def click_btn_connect(_):
         if hook_ble_scan_simulated_loggers:
             _t('detected simulation setting, forcing fake mac')
             m = '11:22:33:44:55:66'
-            rue(_ble_connect(m))
+            ruc(_ble_connect(m))
             return
 
         hardcoded_mac = hook_ble_hardcoded_mac_to_connect
@@ -131,43 +131,43 @@ def _main(page: ft.Page):
         else:
             _t('detected normal mac to connect')
             m = dd_loggers.value.split(' ')[0]
-        rue(_ble_connect(m))
+        ruc(_ble_connect(m))
 
-    def click_btn_disconnect(_): rue(_ble_disconnect())
-    def click_btn_cmd_stp(_): rue(_ble_cmd_stp())
-    def click_btn_cmd_led(_): rue(_ble_cmd_led())
-    def click_btn_cmd_run(_): rue(_ble_cmd_run())
-    def click_btn_cmd_gdo(_): rue(_ble_cmd_gdo())
+    def click_btn_disconnect(_): ruc(_ble_disconnect())
+    def click_btn_cmd_stp(_): ruc(_ble_cmd_stp())
+    def click_btn_cmd_led(_): ruc(_ble_cmd_led())
+    def click_btn_cmd_run(_): ruc(_ble_cmd_run())
+    def click_btn_cmd_gdo(_): ruc(_ble_cmd_gdo())
 
     def click_btn_cmd_sts(_):
 
         # todo > maybe do this everywhere
-        if not rue(_ble_is_connected()):
+        if not ruc(_ble_is_connected()):
             return
 
-        rue(_ble_cmd_sts())
+        ruc(_ble_cmd_sts())
         _t('logger datetime before sync')
-        rue(_ble_cmd_gtm())
-        rue(_ble_cmd_stm())
+        ruc(_ble_cmd_gtm())
+        ruc(_ble_cmd_stm())
         _t('logger datetime after sync')
-        rue(_ble_cmd_gtm())
-        rue(_ble_cmd_gfv())
-        rue(_ble_cmd_bat())
+        ruc(_ble_cmd_gtm())
+        ruc(_ble_cmd_gfv())
+        ruc(_ble_cmd_bat())
 
     def click_btn_cmd_mts(_):
-        rue(_ble_cmd_mts())
+        ruc(_ble_cmd_mts())
         _t('refreshing file dropbox after dummy created')
         click_btn_cmd_dir(None)
 
     def click_bnt_cmd_download(_):
         if not dd_files.value:
             return
-        rue(_ble_cmd_download(dd_files.value))
+        ruc(_ble_cmd_download(dd_files.value))
 
     def click_btn_cmd_delete(_):
         if not dd_files.value:
             return
-        rue(_ble_cmd_delete(dd_files.value))
+        ruc(_ble_cmd_delete(dd_files.value))
         _t('refreshing file dropbox after deletion')
         click_btn_cmd_dir(None)
 
@@ -276,19 +276,19 @@ def _main(page: ft.Page):
                 dd_loggers.value = s
                 page.update()
 
-        print('scanning...')
+        _t('scanning...')
         try:
             if hook_ble_scan_simulated_loggers:
                 s = '11:22:33:44:55:66   DO-2'
                 dd_loggers.options.append(ft.dropdown.Option(s))
                 dd_loggers.value = s
                 page.update()
-                return
-
-            scanner = bleak.BleakScanner(_scan_cb, None)
-            await scanner.start()
-            await asyncio.sleep(1)
-            await scanner.stop()
+            else:
+                scanner = bleak.BleakScanner(_scan_cb, None)
+                await scanner.start()
+                await asyncio.sleep(3)
+                await scanner.stop()
+            _t('scan complete')
 
         except (asyncio.TimeoutError, BleakError, OSError) as ex:
             print(ex)
@@ -326,12 +326,14 @@ def _main(page: ft.Page):
     async def _ble_cmd_dir():
         rv, ls = await lc.cmd_dir()
         if ls == 'error':
-            _t('to list files, logger must be stopped')
+            _t('logger must be stopped to list files')
             return
+
         for filename, size in ls.items():
             v = filename + ' - ' + str(size)
             o = ft.dropdown.Option(v)
             dd_files.options.append(o)
+            # select the last one every time
             dd_files.value = v
             page.update()
 
@@ -392,7 +394,7 @@ def _main(page: ft.Page):
         port = PORT_PROGRESS_BAR
         size = int(size)
 
-        # internally, this sends UDP flags
+        # this DWL command sends progress UDP packets
         rv = await lc.cmd_dwl(size, ip, port)
         elapsed_time = time.perf_counter() - _t_dl
         speed = (size / elapsed_time) / 1000

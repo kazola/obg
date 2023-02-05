@@ -17,7 +17,7 @@ from fleak.main_elements import \
     progress_bar, \
     dlg_file_downloaded, \
     progress_bar_container
-from fleak.settings.ctx import hook_ble_scan_simulated_loggers, hook_ble_hardcoded_mac_to_connect
+from fleak.settings.ctx import hook_ble_scan_simulated_loggers, hook_ble_hardcoded_mac
 
 PORT_PROGRESS_BAR = 56142
 
@@ -103,17 +103,19 @@ def _main(page: ft.Page):
     # PAGE icon GUI button clicks
     # ----------------------------------------------------
 
+    def _on_click_ensure_connected(func):
+        def wrapper(*args):
+            if not ruc(_ble_is_connected()):
+                _t('BLE is not connected')
+                return
+            func(*args)
+        return wrapper
+
     def click_btn_scan(_):
         dd_loggers.value = ''
         dd_loggers.options = []
         page.update()
         ruc(_ble_scan())
-
-    def click_btn_cmd_dir(_):
-        dd_files.value = ''
-        dd_files.options = []
-        page.update()
-        ruc(_ble_cmd_dir())
 
     def click_btn_connect(_):
         if hook_ble_scan_simulated_loggers:
@@ -122,29 +124,40 @@ def _main(page: ft.Page):
             ruc(_ble_connect(m))
             return
 
-        hardcoded_mac = hook_ble_hardcoded_mac_to_connect
-        if not dd_loggers.value and not hardcoded_mac:
+        if not dd_loggers.value and not hook_ble_hardcoded_mac:
             return
-        if hardcoded_mac:
+        m = hook_ble_hardcoded_mac
+        if m:
             _t('detected ARCHER laptop, forcing mac')
-            m = hardcoded_mac
         else:
             _t('detected normal mac to connect')
             m = dd_loggers.value.split(' ')[0]
         ruc(_ble_connect(m))
 
+    @_on_click_ensure_connected
+    def click_btn_cmd_dir(_):
+        dd_files.value = ''
+        dd_files.options = []
+        page.update()
+        ruc(_ble_cmd_dir())
+
+    @_on_click_ensure_connected
     def click_btn_disconnect(_): ruc(_ble_disconnect())
+
+    @_on_click_ensure_connected
     def click_btn_cmd_stp(_): ruc(_ble_cmd_stp())
+
+    @_on_click_ensure_connected
     def click_btn_cmd_led(_): ruc(_ble_cmd_led())
+
+    @_on_click_ensure_connected
     def click_btn_cmd_run(_): ruc(_ble_cmd_run())
+
+    @_on_click_ensure_connected
     def click_btn_cmd_gdo(_): ruc(_ble_cmd_gdo())
 
+    @_on_click_ensure_connected
     def click_btn_cmd_sts(_):
-
-        # todo > maybe do this everywhere
-        if not ruc(_ble_is_connected()):
-            return
-
         ruc(_ble_cmd_sts())
         _t('logger datetime before sync')
         ruc(_ble_cmd_gtm())
@@ -153,17 +166,21 @@ def _main(page: ft.Page):
         ruc(_ble_cmd_gtm())
         ruc(_ble_cmd_gfv())
         ruc(_ble_cmd_bat())
+        ruc(_ble_cmd_rli())
 
+    @_on_click_ensure_connected
     def click_btn_cmd_mts(_):
         ruc(_ble_cmd_mts())
         _t('refreshing file dropbox after dummy created')
         click_btn_cmd_dir(None)
 
+    @_on_click_ensure_connected
     def click_bnt_cmd_download(_):
         if not dd_files.value:
             return
         ruc(_ble_cmd_download(dd_files.value))
 
+    @_on_click_ensure_connected
     def click_btn_cmd_delete(_):
         if not dd_files.value:
             return
@@ -323,6 +340,10 @@ def _main(page: ft.Page):
         if rv == 0:
             _t('logger time synced OK')
 
+    async def _ble_cmd_rli():
+        rv = await lc.cmd_rli()
+        print(rv)
+
     async def _ble_cmd_dir():
         rv, ls = await lc.cmd_dir()
         if ls == 'error':
@@ -370,10 +391,7 @@ def _main(page: ft.Page):
         _t(s)
 
     async def _ble_is_connected():
-        if not await lc.is_connected():
-            _t('BLE is not connected')
-            return
-        return True
+        return await lc.is_connected()
 
     async def _ble_cmd_download(file_to_dl):
         filename, _, size = file_to_dl.split()

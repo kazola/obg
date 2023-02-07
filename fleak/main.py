@@ -169,6 +169,10 @@ def _main(page: ft.Page):
         ruc(_ble_cmd_rli())
 
     @_on_click_ensure_connected
+    def click_btn_cmd_cfg(_):
+        ruc(_ble_cmd_cfg())
+
+    @_on_click_ensure_connected
     def click_btn_cmd_mts(_):
         ruc(_ble_cmd_mts())
         _t('refreshing file dropbox after dummy created')
@@ -267,6 +271,11 @@ def _main(page: ft.Page):
                 on_click=click_btn_cmd_gdo,
                 icon_size=50, icon_color='cyan',
                 tooltip='do an oxygen measurement'),
+            ft.IconButton(
+                ft.icons.DISPLAY_SETTINGS,
+                on_click=click_btn_cmd_cfg,
+                icon_size=50, icon_color='black',
+                tooltip='send MAT.cfg file to logger'),
         ], alignment=ft.MainAxisAlignment.CENTER, expand=1),
     )
 
@@ -324,21 +333,45 @@ def _main(page: ft.Page):
         rv = await lc.cmd_bat()
         if rv[0] == 0:
             _t('battery: {} mV'.format(rv[1]))
+        else:
+            _t('battery command failed')
 
     async def _ble_cmd_gfv():
         rv = await lc.cmd_gfv()
         if rv[0] == 0:
             _t('firmware version: {}'.format(rv[1]))
+        else:
+            _t('version command failed')
 
     async def _ble_cmd_gtm():
         rv = await lc.cmd_gtm()
         if rv[0] == 0:
             _t('{}'.format(rv[1]))
+        else:
+            _t('get_time command failed')
 
     async def _ble_cmd_stm():
         rv = await lc.cmd_stm()
         if rv == 0:
             _t('logger time synced OK')
+        else:
+            _t('error syncing logger time')
+
+    async def _ble_cmd_cfg():
+        j = {
+            "DFN": "fle",
+            "TMP": 0, "PRS": 0, "DOS": 1, "DOP": 1, "DOT": 1,
+            "TRI": 10, "ORI": 10, "DRI": 60,
+            "PRR": 1, "PRN": 1,
+            "STM": "2012-11-12 12:14:00",
+            "ETM": "2030-11-12 12:14:20",
+            "LED": 1
+        }
+        rv = await lc.cmd_cfg(j)
+        if rv == 0:
+            _t('logger set MAT.cfg OK')
+        else:
+            _t('error setting MAT.cfg to logger')
 
     async def _ble_cmd_rli():
         rv, info = await lc.cmd_rli()
@@ -366,11 +399,15 @@ def _main(page: ft.Page):
         rv = await lc.cmd_stp()
         if rv == 0:
             _t('command STOP successful')
+        else:
+            _t('error command STOP')
 
     async def _ble_cmd_led():
         rv = await lc.cmd_led()
         if rv == 0:
             _t('command LED successful')
+        else:
+            _t('error command LED')
 
     async def _ble_cmd_gdo():
         rv = await lc.cmd_gdo()
@@ -383,11 +420,15 @@ def _main(page: ft.Page):
         rv = await lc.cmd_run()
         if rv == 0:
             _t('command RUN successful')
+        else:
+            _t('error command RUN')
 
     async def _ble_cmd_mts():
         rv = await lc.cmd_mts()
         if rv == 0:
             _t('command MTS successful')
+        else:
+            _t('error command MTS')
 
     async def _ble_cmd_sts():
         rv = await lc.cmd_sts()

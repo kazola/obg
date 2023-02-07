@@ -341,8 +341,12 @@ def _main(page: ft.Page):
             _t('logger time synced OK')
 
     async def _ble_cmd_rli():
-        rv = await lc.cmd_rli()
-        print(rv)
+        rv, info = await lc.cmd_rli()
+        if rv:
+            _t('RLI failed')
+            return
+        for k, v in info.items():
+            _t('{}: {}'.format(k, v))
 
     async def _ble_cmd_dir():
         rv, ls = await lc.cmd_dir()

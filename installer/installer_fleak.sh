@@ -2,30 +2,27 @@
 echo; echo; echo
 
 
-# -----------------------------------------------------------------------
-# curl -L https://raw.githubusercontent.com/LowellInstruments/fleak/master/installer/installer_fleak.sh | bash
-# -----------------------------------------------------------------------
+# ----------------------------------------------------
+# curl -L <online_location_of_this_sh_file.sh> | bash
+# ----------------------------------------------------
 
 
 _e() {
   rv=$1
-  if [ "$rv" -ne 0 ]; then
-    printf '%s' "$2"
-    exit 1
-fi
+  if [ "$rv" -ne 0 ]; then printf '%s' "$2"; exit 1; fi
 }
 
 
 printf '> CURL installer for Lowell Instruments FLEAK GUI console\n'
 printf '> step 1) Creating virtual env\n'
-rm -rf venv_fleak
-python3 -m venv venv_fleak
-source venv_fleak/bin/activate
+rm -rf venv_fleak; python3 -m venv venv_fleak; source venv_fleak/bin/activate
 _e $? 'error creating fleak virtual environment\n'
 
 
-printf '> step 2) Installing MAT library'
-pip install git+https://github.com/lowellinstruments/lowell-mat.git@v4
+printf '> step 2) Installing MAT library\n'
+git clone git+https://github.com/lowellinstruments/lowell-mat.git -b v4
+cp lowell-mat/tools/_setup_wo_reqs.py lowell-mat/setup.py
+pip3 install ./lowell-mat
 _e $? 'error installing MAT library\n'
 
 

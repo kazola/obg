@@ -5,6 +5,9 @@ from mat.ble.bleak.cc26x2r_sim import BleCC26X2Sim
 from fleak.settings.ctx import hook_ble_scan_simulated_loggers
 
 
+PORT_PROGRESS_BAR = 56142
+
+
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
 lv = ft.ListView(expand=1, spacing=10, padding=20, auto_scroll=True)

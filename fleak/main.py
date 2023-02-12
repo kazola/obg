@@ -7,7 +7,6 @@ import flet as ft
 import bleak
 import asyncio
 from bleak import BLEDevice, BleakError
-import platform
 from fleak.main_elements import \
     ruc, \
     dd_loggers, \
@@ -16,10 +15,9 @@ from fleak.main_elements import \
     lc, \
     progress_bar, \
     dlg_file_downloaded, \
-    progress_bar_container
+    progress_bar_container, PORT_PROGRESS_BAR
 from fleak.settings.ctx import hook_ble_scan_simulated_loggers, hook_ble_hardcoded_mac
-
-PORT_PROGRESS_BAR = 56142
+from mat.ble.ble_mat_utils import ble_mat_bluetoothctl_disconnect
 
 
 def _main(page: ft.Page):
@@ -38,13 +36,13 @@ def _main(page: ft.Page):
                 _u, addr = _sk.recvfrom(1024)
                 v = _u.split(b'/')
 
-                # parse UDP frame sent by lowell-mat
+                # UDP frame incoming from lowell-mat
                 if v[0] == b'state_dds_ble_download_progress':
                     p = float(v[1].decode()) / 100
                     progress_bar.controls[1].value = p
                     page.update()
 
-                # parse UDP frame same from this same app
+                # UDP frame same from this same app
                 elif v[0] == b'bye_thread':
                     print('received: closing progress bar thread')
                     return
@@ -324,6 +322,7 @@ def _main(page: ft.Page):
     async def _ble_disconnect():
         await lc.disconnect()
         _t('disconnected')
+        ble_mat_bluetoothctl_disconnect()
 
     async def _ble_cmd_bat():
         rv = await lc.cmd_bat()

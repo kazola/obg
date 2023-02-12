@@ -10,7 +10,7 @@ _e() {
 }
 
 echo; echo; echo
-printf '=== CURL installer for Lowell Instruments BLE GUI console, aka fleak ===\n'
+printf '=== CURL installer for Lowell Instruments BLE GUI console, aka fleak === \n'
 
 printf '> step 1) Creating virtual env\n'
 rm -rf venv_fleak; python3 -m venv venv_fleak; source venv_fleak/bin/activate

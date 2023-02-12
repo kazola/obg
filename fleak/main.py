@@ -126,12 +126,12 @@ def _main(page: ft.Page):
 
         if not dd_loggers.value and not hook_ble_hardcoded_mac:
             return
-        m = hook_ble_hardcoded_mac
-        if m:
-            _t('detected ARCHER laptop, forcing mac')
-        else:
-            _t('detected normal mac to connect')
+        if dd_loggers.value:
             m = dd_loggers.value.split(' ')[0]
+            _t('connecting to chosen mac')
+        else:
+            m = hook_ble_hardcoded_mac
+            _t('detected ARCHER laptop, forcing mac')
         ruc(_ble_connect(m))
 
     @_on_click_ensure_connected

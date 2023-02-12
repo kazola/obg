@@ -14,19 +14,21 @@ _e() {
 
 
 printf '> CURL installer for Lowell Instruments FLEAK GUI console\n'
+
 printf '> step 1) Creating virtual env\n'
 rm -rf venv_fleak; python3 -m venv venv_fleak; source venv_fleak/bin/activate
 _e $? 'error creating fleak virtual environment\n'
 
+printf '> step 2) Cloning MAT library\n'
+git clone https://github.com/lowellinstruments/lowell-mat.git -b v4
+_e $? 'error cloning MAT library\n'
 
-printf '> step 2) Installing MAT library\n'
-git clone git+https://github.com/lowellinstruments/lowell-mat.git -b v4
+printf '> step 3) Installing MAT library\n'
 cp lowell-mat/tools/_setup_wo_reqs.py lowell-mat/setup.py
 pip3 install ./lowell-mat
 _e $? 'error installing MAT library\n'
 
-
-printf '> step 3) Installing fleak\n'
+printf '> step 4) Installing fleak\n'
 pip install git+https://github.com/lowellinstruments/fleak.git
 _e $? 'error installing fleak\n'
 

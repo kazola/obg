@@ -384,7 +384,7 @@ def _main(page: ft.Page):
     async def _ble_cmd_dir():
         rv, ls = await lc.cmd_dir()
 
-        if not {}:
+        if not ls:
             _t('logger seems to contain no files')
             return
 

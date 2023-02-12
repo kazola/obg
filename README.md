@@ -2,10 +2,13 @@
 
 Python3 Flet + Bleak GUI console for Lowell Instruments' Bluetooth loggers.
 
+
 ## To install
 
-todo: _write curl things here_
-todo: remember to install MAT as empty requirements
+```console
+curl -L https://raw.githubusercontent.com/LowellInstruments/fleak/master/installer/installer_fleak.sh | bash
+```
+
 
 ## Changelog
 

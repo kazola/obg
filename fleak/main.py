@@ -287,20 +287,16 @@ def _main(page: ft.Page):
         _det = []
 
         def _scan_cb(d: BLEDevice, _):
-            logger_accepted_types = [
-                'DO-2',
-                'DO-1',
-                'TAP'
-            ]
-            if d.name not in logger_accepted_types:
+            if d.address in _det:
+                return
+            if d.name not in ('DO-2', 'DO-1'):
                 return
 
-            if d.name not in _det:
-                _det.append(d.name)
-                s = d.address + '   ' + d.name
-                dd_loggers.options.append(ft.dropdown.Option(s))
-                dd_loggers.value = s
-                page.update()
+            _det.append(d.name)
+            s = d.address + '   ' + d.name
+            dd_loggers.options.append(ft.dropdown.Option(s))
+            dd_loggers.value = s
+            page.update()
 
         _t('scanning...')
         try:

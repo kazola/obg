@@ -131,7 +131,7 @@ def _main(page: ft.Page):
             _t('connecting to chosen mac')
         else:
             m = hook_ble_hardcoded_mac
-            _t('detected ARCHER laptop, forcing mac')
+            _t('no mac selected, using development one...')
         ruc(_ble_connect(m))
 
     @_on_click_ensure_connected
@@ -383,6 +383,11 @@ def _main(page: ft.Page):
 
     async def _ble_cmd_dir():
         rv, ls = await lc.cmd_dir()
+
+        if not {}:
+            _t('logger seems to contain no files')
+            return
+
         if ls == 'error':
             _t('logger must be stopped to list files')
             return
@@ -493,8 +498,8 @@ def _main(page: ft.Page):
 
 # app can run from here OR setup.py entry point 'fleak'
 def main():
-    ft.app(target=_main)
-    # ft.app(target=_main,  view=ft.WEB_BROWSER)
+    # ft.app(target=_main)
+    ft.app(target=_main, view=ft.WEB_BROWSER)
 
 
 if __name__ == '__main__':

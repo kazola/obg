@@ -308,7 +308,7 @@ def _main(page: ft.Page):
             else:
                 scanner = bleak.BleakScanner(_scan_cb, None)
                 await scanner.start()
-                await asyncio.sleep(3)
+                await asyncio.sleep(6)
                 await scanner.stop()
             _t('scan complete')
 

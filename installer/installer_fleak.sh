@@ -32,7 +32,7 @@ printf '\n\n> step 3) Installing MAT library\n'
 
 printf '\n\n> step 4) Installing fleak\n'
     pip install git+https://github.com/lowellinstruments/fleak.git
-_   e $? 'error installing fleak\n'
+    _e $? 'error installing fleak\n'
 
 
 printf '\n\n> done! now you type the following to run the fleak GUI\n\n'

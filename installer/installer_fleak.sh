@@ -1,19 +1,16 @@
 #!/usr/bin/bash
-echo; echo; echo
-
 
 # ----------------------------------------------------
 # curl -L <online_location_of_this_sh_file.sh> | bash
 # ----------------------------------------------------
-
 
 _e() {
   rv=$1
   if [ "$rv" -ne 0 ]; then printf '%s' "$2"; exit 1; fi
 }
 
-
-printf '> CURL installer for Lowell Instruments FLEAK GUI console\n'
+echo; echo; echo
+printf '=== CURL installer for Lowell Instruments BLE GUI console, aka fleak ===\n'
 
 printf '> step 1) Creating virtual env\n'
 rm -rf venv_fleak; python3 -m venv venv_fleak; source venv_fleak/bin/activate

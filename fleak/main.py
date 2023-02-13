@@ -18,6 +18,7 @@ from fleak.main_elements import \
     progress_bar_container, PORT_PROGRESS_BAR
 from fleak.settings.ctx import hook_ble_scan_simulated_loggers, hook_ble_hardcoded_mac
 from mat.ble.ble_mat_utils import ble_mat_bluetoothctl_disconnect
+from mat.data_converter import default_parameters, DataConverter
 
 
 def _main(page: ft.Page):
@@ -470,22 +471,33 @@ def _main(page: ft.Page):
         progress_bar.visible = False
         page.update()
 
-        # save file locally
-        if rv[0] == 0:
-            s = 'download complete {}, {} bytes'
-            _t(s.format(filename, size))
-            p = str(pathlib.Path.home())
-            if hook_ble_scan_simulated_loggers:
-                m = '11-22-33-44-55-66'
-            else:
-                m = lc.cli.address.replace(':', '-')
+        # leave if no success
+        if rv[0] != 0:
+            _t('seems error download')
+            return
 
-            p = p + '/Downloads/dl_fleak/{}'.format(m)
-            os.makedirs(p, exist_ok=True)
-            p = p + '/{}'.format(filename)
-            with open(p, 'wb') as f:
-                f.write(rv[1])
-            _page_show_dlg_file_downloaded(p)
+        # save file locally
+        s = 'download complete {}, {} bytes'
+        _t(s.format(filename, size))
+        p = str(pathlib.Path.home())
+        if hook_ble_scan_simulated_loggers:
+            m = '11-22-33-44-55-66'
+        else:
+            m = lc.cli.address.replace(':', '-')
+        p = p + '/Downloads/dl_fleak/{}'.format(m)
+        os.makedirs(p, exist_ok=True)
+        p = p + '/{}'.format(filename)
+        with open(p, 'wb') as f:
+            f.write(rv[1])
+        _page_show_dlg_file_downloaded(p)
+
+        # try to convert
+        parameters = default_parameters()
+        try:
+            DataConverter(p, parameters).convert()
+            _t('converted file {}'.format(p))
+        except (Exception, ):
+            _t('error converting file {}'.format(p))
 
     async def _ble_cmd_delete(f):
         name, _, __ = f.split()

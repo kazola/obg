@@ -127,7 +127,7 @@ def _main(page: ft.Page):
             return
         if dd_loggers.value:
             m = dd_loggers.value.split(' ')[0]
-            _t('connecting to chosen mac')
+            _t('connecting to chosen mac from dropdown')
         else:
             m = hook_ble_hardcoded_mac
             _t('no mac selected, using development one...')
@@ -291,13 +291,13 @@ def _main(page: ft.Page):
             if d.name not in ('DO-2', 'DO-1'):
                 return
 
-            _det.append(d.name)
+            _det.append(d.address)
             s = d.address + '   ' + d.name
             dd_loggers.options.append(ft.dropdown.Option(s))
             dd_loggers.value = s
             page.update()
 
-        _t('scanning...')
+        _t('scanning for nearby loggers...')
         try:
             if hook_ble_scan_simulated_loggers:
                 s = '11:22:33:44:55:66   DO-2'

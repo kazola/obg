@@ -174,7 +174,7 @@ def _main(page: ft.Page):
     @_on_click_ensure_connected
     def click_btn_cmd_mts(_):
         ruc(_ble_cmd_mts())
-        _t('refreshing file dropbox after dummy created')
+        _t('refreshing file dropdown after dummy created')
         click_btn_cmd_dir(None)
 
     @_on_click_ensure_connected
@@ -188,7 +188,7 @@ def _main(page: ft.Page):
         if not dd_files.value:
             return
         ruc(_ble_cmd_delete(dd_files.value))
-        _t('refreshing file dropbox after deletion')
+        _t('refreshing file dropdown after deletion')
         click_btn_cmd_dir(None)
 
     # -----------------

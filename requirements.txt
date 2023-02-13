@@ -16,3 +16,4 @@ six==1.16.0
 urllib3==1.26.14
 watchdog==2.2.1
 websocket-client==1.5.0
+h5py==3.8.0

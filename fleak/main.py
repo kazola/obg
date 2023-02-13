@@ -356,7 +356,7 @@ def _main(page: ft.Page):
         j = {
             "DFN": "fle",
             "TMP": 0, "PRS": 0, "DOS": 1, "DOP": 1, "DOT": 1,
-            "TRI": 10, "ORI": 10, "DRI": 60,
+            "TRI": 10, "ORI": 10, "DRI": 30,
             "PRR": 1, "PRN": 1,
             "STM": "2012-11-12 12:14:00",
             "ETM": "2030-11-12 12:14:20",
@@ -415,6 +415,11 @@ def _main(page: ft.Page):
             _t('sensor DO error')
         else:
             _t(str(rv))
+        rv = await lc.cmd_wat()
+        if not rv:
+            _t('sensor WAT error')
+        else:
+            _t('WAT {}'.format(rv))
 
     async def _ble_cmd_run():
         rv = await lc.cmd_run()

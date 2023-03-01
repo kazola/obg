@@ -147,25 +147,22 @@ def _main(page: ft.Page):
     def click_btn_cmd_stp(_): ruc(_ble_cmd_stp())
 
     @_on_click_ensure_connected
+    def click_btn_cmd_sws(_): ruc(_ble_cmd_sws())
+
+    @_on_click_ensure_connected
     def click_btn_cmd_led(_): ruc(_ble_cmd_led())
 
     @_on_click_ensure_connected
     def click_btn_cmd_run(_): ruc(_ble_cmd_run())
 
     @_on_click_ensure_connected
-    def click_btn_cmd_gdo(_): ruc(_ble_cmd_gdo())
+    def click_btn_cmd_rws(_): ruc(_ble_cmd_rws())
 
     @_on_click_ensure_connected
-    def click_btn_cmd_sts(_):
-        ruc(_ble_cmd_sts())
-        _t('logger datetime before sync')
-        ruc(_ble_cmd_gtm())
-        ruc(_ble_cmd_stm())
-        _t('logger datetime after sync')
-        ruc(_ble_cmd_gtm())
-        ruc(_ble_cmd_gfv())
-        ruc(_ble_cmd_bat())
-        ruc(_ble_cmd_rli())
+    def click_btn_cmd_pft(_): ruc(_ble_cmd_pft())
+
+    @_on_click_ensure_connected
+    def click_btn_cmd_gdo(_): ruc(_ble_cmd_gdo())
 
     @_on_click_ensure_connected
     def click_btn_cmd_cfg(_):
@@ -190,6 +187,21 @@ def _main(page: ft.Page):
         ruc(_ble_cmd_delete(dd_files.value))
         _t('refreshing file dropdown after deletion')
         click_btn_cmd_dir(None)
+
+    @_on_click_ensure_connected
+    def click_btn_cmd_sts(_):
+        ruc(_ble_cmd_sts())
+        ruc(_ble_cmd_bat())
+        ruc(_ble_cmd_gfv())
+        ruc(_ble_cmd_utm())
+        # ruc(_ble_cmd_log())
+
+        _t('logger datetime before sync')
+        ruc(_ble_cmd_gtm())
+        ruc(_ble_cmd_stm())
+        _t('logger datetime after sync')
+        ruc(_ble_cmd_gtm())
+        # ruc(_ble_cmd_rli())
 
     # -----------------
     # page HTML layout
@@ -230,6 +242,7 @@ def _main(page: ft.Page):
                 on_click=click_btn_cmd_sts,
                 icon_size=50, icon_color='black',
                 tooltip='query logger status'),
+
             ft.IconButton(
                 ft.icons.STOP,
                 on_click=click_btn_cmd_stp,
@@ -240,6 +253,23 @@ def _main(page: ft.Page):
                 on_click=click_btn_cmd_run,
                 icon_size=50, icon_color='green',
                 tooltip='send RUN command to logger'),
+
+            ft.IconButton(
+                ft.icons.STOP,
+                on_click=click_btn_cmd_sws,
+                icon_size=50, icon_color='yellow',
+                tooltip='send STOP command to logger'),
+            ft.IconButton(
+                ft.icons.PLAY_ARROW,
+                on_click=click_btn_cmd_rws,
+                icon_size=50, icon_color='yellow',
+                tooltip='send RWS command to logger'),
+            ft.IconButton(
+                ft.icons.HOURGLASS_TOP,
+                on_click=click_btn_cmd_pft,
+                icon_size=50, icon_color='yellow',
+                tooltip='send PFT command to logger'),
+
             ft.IconButton(
                 ft.icons.WORKSPACES_FILLED,
                 on_click=click_btn_cmd_led,
@@ -288,7 +318,7 @@ def _main(page: ft.Page):
         def _scan_cb(d: BLEDevice, _):
             if d.address in _det:
                 return
-            if d.name not in ('DO-2', 'DO-1'):
+            if d.name not in ('DO-2', 'DO-1', 'TAP1'):
                 return
 
             _det.append(d.address)
@@ -338,6 +368,27 @@ def _main(page: ft.Page):
             _t('firmware version: {}'.format(rv[1]))
         else:
             _t('version command failed')
+
+    async def _ble_cmd_utm():
+        rv = await lc.cmd_utm()
+        if rv[0] == 0:
+            _t('uptime: {}'.format(rv[1]))
+        else:
+            _t('uptime command failed')
+
+    async def _ble_cmd_log():
+        rv = await lc.cmd_log()
+        if rv[0] == 0:
+            _t('log is {}'.format(rv[1]))
+        else:
+            _t('log command failed')
+
+    async def _ble_cmd_pft():
+        rv = await lc.cmd_pft()
+        if rv[0] == 0:
+            _t('command PFT OK = {}'.format(rv[1]))
+        else:
+            _t('error command PFT')
 
     async def _ble_cmd_gtm():
         rv = await lc.cmd_gtm()
@@ -428,6 +479,22 @@ def _main(page: ft.Page):
             _t('command RUN successful')
         else:
             _t('error command RUN')
+
+    async def _ble_cmd_rws():
+        g = ('1.111111', '2.222222', None, None)
+        rv = await lc.cmd_rws(g)
+        if rv == 0:
+            _t('command RWS successful')
+        else:
+            _t('error command RWS')
+
+    async def _ble_cmd_sws():
+        g = ('-3.333333', '-4.444444', None, None)
+        rv = await lc.cmd_sws(g)
+        if rv == 0:
+            _t('command SWS successful')
+        else:
+            _t('error command SWS')
 
     async def _ble_cmd_mts():
         rv = await lc.cmd_mts()

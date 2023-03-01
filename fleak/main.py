@@ -162,6 +162,9 @@ def _main(page: ft.Page):
     def click_btn_cmd_pft(_): ruc(_ble_cmd_pft())
 
     @_on_click_ensure_connected
+    def click_btn_cmd_pfg(_): ruc(_ble_cmd_pfg())
+
+    @_on_click_ensure_connected
     def click_btn_cmd_gdo(_): ruc(_ble_cmd_gdo())
 
     @_on_click_ensure_connected
@@ -269,6 +272,11 @@ def _main(page: ft.Page):
                 on_click=click_btn_cmd_pft,
                 icon_size=50, icon_color='yellow',
                 tooltip='send PFT command to logger'),
+            ft.IconButton(
+                ft.icons.HOURGLASS_EMPTY,
+                on_click=click_btn_cmd_pfg,
+                icon_size=50, icon_color='yellow',
+                tooltip='send PFG command to logger'),
 
             ft.IconButton(
                 ft.icons.WORKSPACES_FILLED,
@@ -389,6 +397,13 @@ def _main(page: ft.Page):
             _t('command PFT OK = {}'.format(rv[1]))
         else:
             _t('error command PFT')
+
+    async def _ble_cmd_pfg():
+        rv = await lc.cmd_pfg()
+        if rv[0] == 0:
+            _t('command PFG OK = {}'.format(rv[1]))
+        else:
+            _t('error command PFG')
 
     async def _ble_cmd_gtm():
         rv = await lc.cmd_gtm()

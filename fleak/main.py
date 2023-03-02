@@ -261,12 +261,12 @@ def _main(page: ft.Page):
                 ft.icons.STOP,
                 on_click=click_btn_cmd_sws,
                 icon_size=50, icon_color='yellow',
-                tooltip='send STOP command to logger'),
+                tooltip='send STOP profiling command to logger'),
             ft.IconButton(
                 ft.icons.PLAY_ARROW,
                 on_click=click_btn_cmd_rws,
                 icon_size=50, icon_color='yellow',
-                tooltip='send RWS command to logger'),
+                tooltip='send RWS profiling command to logger'),
             ft.IconButton(
                 ft.icons.HOURGLASS_TOP,
                 on_click=click_btn_cmd_pft,

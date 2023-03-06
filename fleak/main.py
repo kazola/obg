@@ -183,6 +183,10 @@ def _main(page: ft.Page):
         _t('refreshing file dropdown after dummy created')
         click_btn_cmd_dir(None)
 
+    def click_btn_clear_trace(_):
+        lv.controls = []
+        page.update()
+
     @_on_click_ensure_connected
     def click_bnt_cmd_download(_):
         if not dd_files.value:
@@ -247,41 +251,30 @@ def _main(page: ft.Page):
                 icon_size=50, icon_color='lightblue',
                 tooltip='disconnect from a logger'),
             ft.IconButton(
-                ft.icons.QUESTION_MARK,
-                on_click=click_btn_cmd_sts,
-                icon_size=50, icon_color='black',
-                tooltip='query logger status'),
-            ft.IconButton(
-                ft.icons.PHONELINK_ERASE,
-                on_click=click_btn_cmd_frm,
-                icon_size=50, icon_color='black',
-                tooltip='FORMAT LOGGER'),
-
+                ft.icons.PLAY_ARROW,
+                on_click=click_btn_cmd_run,
+                icon_size=50, icon_color='green',
+                tooltip='send RUN command to logger'),
             ft.IconButton(
                 ft.icons.STOP,
                 on_click=click_btn_cmd_stp,
                 icon_size=50, icon_color='red',
                 tooltip='send STOP command to logger'),
             ft.IconButton(
-                ft.icons.PLAY_ARROW,
-                on_click=click_btn_cmd_run,
-                icon_size=50, icon_color='green',
-                tooltip='send RUN command to logger'),
-            ft.IconButton(
                 ft.icons.LIGHTBULB,
                 on_click=click_btn_cmd_pfe,
                 icon_size=50, icon_color='yellow',
                 tooltip='send PFE profiling command to logger'),
             ft.IconButton(
-                ft.icons.STOP,
-                on_click=click_btn_cmd_sws,
-                icon_size=50, icon_color='yellow',
-                tooltip='send SWS profiling command to logger'),
-            ft.IconButton(
                 ft.icons.PLAY_ARROW,
                 on_click=click_btn_cmd_rws,
                 icon_size=50, icon_color='yellow',
                 tooltip='send RWS profiling command to logger'),
+            ft.IconButton(
+                ft.icons.STOP,
+                on_click=click_btn_cmd_sws,
+                icon_size=50, icon_color='yellow',
+                tooltip='send SWS profiling command to logger'),
             ft.IconButton(
                 ft.icons.HOURGLASS_TOP,
                 on_click=click_btn_cmd_pft,
@@ -292,7 +285,18 @@ def _main(page: ft.Page):
                 on_click=click_btn_cmd_pfg,
                 icon_size=50, icon_color='yellow',
                 tooltip='send PFG command to logger'),
-
+        ], alignment=ft.MainAxisAlignment.CENTER, expand=1),
+        ft.Row([
+            ft.IconButton(
+                ft.icons.QUESTION_MARK,
+                on_click=click_btn_cmd_sts,
+                icon_size=50, icon_color='black',
+                tooltip='query logger status'),
+            ft.IconButton(
+                ft.icons.DELETE_FOREVER,
+                on_click=click_btn_cmd_frm,
+                icon_size=50, icon_color='black',
+                tooltip='FORMAT LOGGER'),
             ft.IconButton(
                 ft.icons.WORKSPACES_FILLED,
                 on_click=click_btn_cmd_led,
@@ -328,6 +332,12 @@ def _main(page: ft.Page):
                 on_click=click_btn_cmd_cfg,
                 icon_size=50, icon_color='black',
                 tooltip='send MAT.cfg file to logger'),
+            ft.IconButton(
+                ft.icons.PHONELINK_ERASE,
+                on_click=click_btn_clear_trace,
+                icon_size=50, icon_color='black',
+                tooltip='clear trace'),
+
         ], alignment=ft.MainAxisAlignment.CENTER, expand=1),
     )
 
@@ -403,7 +413,10 @@ def _main(page: ft.Page):
         rv = await lc.cmd_pfe()
         if rv[0] == 1:
             _t('PFE command failed')
-        else:
+            return
+        if rv[1] == 0:
+            _t('PFE is disabled')
+        if rv[1] == 1:
             _t('PFE is enabled')
 
     async def _ble_cmd_pft():

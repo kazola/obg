@@ -156,6 +156,9 @@ def _main(page: ft.Page):
     def click_btn_cmd_run(_): ruc(_ble_cmd_run())
 
     @_on_click_ensure_connected
+    def click_btn_cmd_pfe(_): ruc(_ble_cmd_pfe())
+
+    @_on_click_ensure_connected
     def click_btn_cmd_rws(_): ruc(_ble_cmd_rws())
 
     @_on_click_ensure_connected
@@ -166,6 +169,9 @@ def _main(page: ft.Page):
 
     @_on_click_ensure_connected
     def click_btn_cmd_gdo(_): ruc(_ble_cmd_gdo())
+
+    @_on_click_ensure_connected
+    def click_btn_cmd_frm(_): ruc(_ble_cmd_frm())
 
     @_on_click_ensure_connected
     def click_btn_cmd_cfg(_):
@@ -245,6 +251,11 @@ def _main(page: ft.Page):
                 on_click=click_btn_cmd_sts,
                 icon_size=50, icon_color='black',
                 tooltip='query logger status'),
+            ft.IconButton(
+                ft.icons.PHONELINK_ERASE,
+                on_click=click_btn_cmd_frm,
+                icon_size=50, icon_color='black',
+                tooltip='FORMAT LOGGER'),
 
             ft.IconButton(
                 ft.icons.STOP,
@@ -256,12 +267,16 @@ def _main(page: ft.Page):
                 on_click=click_btn_cmd_run,
                 icon_size=50, icon_color='green',
                 tooltip='send RUN command to logger'),
-
+            ft.IconButton(
+                ft.icons.LIGHTBULB,
+                on_click=click_btn_cmd_pfe,
+                icon_size=50, icon_color='yellow',
+                tooltip='send PFE profiling command to logger'),
             ft.IconButton(
                 ft.icons.STOP,
                 on_click=click_btn_cmd_sws,
                 icon_size=50, icon_color='yellow',
-                tooltip='send STOP profiling command to logger'),
+                tooltip='send SWS profiling command to logger'),
             ft.IconButton(
                 ft.icons.PLAY_ARROW,
                 on_click=click_btn_cmd_rws,
@@ -384,12 +399,12 @@ def _main(page: ft.Page):
         else:
             _t('uptime command failed')
 
-    async def _ble_cmd_log():
-        rv = await lc.cmd_log()
-        if rv[0] == 0:
-            _t('log is {}'.format(rv[1]))
+    async def _ble_cmd_pfe():
+        rv = await lc.cmd_pfe()
+        if rv[0] == 1:
+            _t('PFE command failed')
         else:
-            _t('log command failed')
+            _t('PFE is enabled')
 
     async def _ble_cmd_pft():
         rv = await lc.cmd_pft()
@@ -468,6 +483,13 @@ def _main(page: ft.Page):
             _t('command STOP successful')
         else:
             _t('error command STOP')
+
+    async def _ble_cmd_frm():
+        rv = await lc.cmd_frm()
+        if rv == 0:
+            _t('command FRM successful')
+        else:
+            _t('error command FRM')
 
     async def _ble_cmd_led():
         rv = await lc.cmd_led()

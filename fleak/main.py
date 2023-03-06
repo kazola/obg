@@ -95,6 +95,17 @@ def _main(page: ft.Page):
         page.update()
         print(str(s))
 
+    def click_btn_clear_trace(_):
+        lv.controls = []
+        _t('cleared trace area')
+        dd_loggers.value = ''
+        dd_loggers.options = []
+        _t('cleared scanned loggers dropdown')
+        dd_files.value = ''
+        dd_files.options = []
+        _t('cleared files dropdown')
+        page.update()
+
     def _t(s):
         _page_trace(s)
 
@@ -182,10 +193,6 @@ def _main(page: ft.Page):
         ruc(_ble_cmd_mts())
         _t('refreshing file dropdown after dummy created')
         click_btn_cmd_dir(None)
-
-    def click_btn_clear_trace(_):
-        lv.controls = []
-        page.update()
 
     @_on_click_ensure_connected
     def click_bnt_cmd_download(_):

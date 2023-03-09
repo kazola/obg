@@ -268,11 +268,6 @@ def _main(page: ft.Page):
                 icon_size=50, icon_color='red',
                 tooltip='send STOP command to logger'),
             ft.IconButton(
-                ft.icons.LIGHTBULB,
-                on_click=click_btn_cmd_pfe,
-                icon_size=50, icon_color='yellow',
-                tooltip='send PFE profiling command to logger'),
-            ft.IconButton(
                 ft.icons.PLAY_ARROW,
                 on_click=click_btn_cmd_rws,
                 icon_size=50, icon_color='yellow',
@@ -282,6 +277,11 @@ def _main(page: ft.Page):
                 on_click=click_btn_cmd_sws,
                 icon_size=50, icon_color='yellow',
                 tooltip='send SWS profiling command to logger'),
+            ft.IconButton(
+                ft.icons.LIGHTBULB,
+                on_click=click_btn_cmd_pfe,
+                icon_size=50, icon_color='yellow',
+                tooltip='send PFE profiling command to logger'),
             ft.IconButton(
                 ft.icons.HOURGLASS_TOP,
                 on_click=click_btn_cmd_pft,
@@ -600,7 +600,7 @@ def _main(page: ft.Page):
             _t('seems error download')
             return
 
-        # save file locally
+        # save file locally, remove if existing
         s = 'download complete {}, {} bytes'
         _t(s.format(filename, size))
         p = str(pathlib.Path.home())
@@ -611,6 +611,10 @@ def _main(page: ft.Page):
         p = p + '/Downloads/dl_fleak/{}'.format(m)
         os.makedirs(p, exist_ok=True)
         p = p + '/{}'.format(filename)
+        if os.path.isfile(p) and filename.startswith('test'):
+            _e = 'test file {} already exists locally, removing it'
+            _t(_e.format(os.path.basename(p)))
+            os.unlink(p)
         with open(p, 'wb') as f:
             f.write(rv[1])
         _page_show_dlg_file_downloaded(p)

@@ -18,6 +18,7 @@ setup(
     install_requires=[
         'flet',
         'bleak',
+        'h5py',
         'humanize',
         'numpy'
     ]

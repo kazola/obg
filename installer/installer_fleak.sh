@@ -25,6 +25,7 @@ printf '\n\n> step 2) Cloning MAT library\n'
 
 
 printf '\n\n> step 3) Installing MAT library\n'
+    # removing MAT library's default "setup.py" file
     cp lowell-mat/tools/_setup_wo_reqs.py lowell-mat/setup.py
     pip3 install ./lowell-mat
     _e $? 'error installing MAT library\n'

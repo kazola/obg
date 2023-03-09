@@ -5,6 +5,7 @@ certifi==2022.12.7
 charset-normalizer==3.0.1
 dbus-fast==1.84.0
 flet==0.3.2
+h5py==3.7.0
 humanize==4.4.0
 idna==3.4
 numpy==1.24.1

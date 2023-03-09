@@ -554,6 +554,7 @@ def _main(page: ft.Page):
             _t('error command SWS')
 
     async def _ble_cmd_mts():
+        _t('started command MTS...')
         rv = await lc.cmd_mts()
         if rv == 0:
             _t('command MTS successful')

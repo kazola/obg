@@ -138,7 +138,7 @@ def _main(page: ft.Page):
             return
         if dd_loggers.value:
             m = dd_loggers.value.split(' ')[0]
-            _t('connecting to chosen mac from dropdown')
+            _t('connecting to mac chosen from dropdown')
         else:
             m = hook_ble_hardcoded_mac
             _t('no mac selected, using development one...')

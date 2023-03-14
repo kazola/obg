@@ -185,6 +185,9 @@ def _main(page: ft.Page):
     def click_btn_cmd_frm(_): ruc(_ble_cmd_frm())
 
     @_on_click_ensure_connected
+    def click_btn_cmd_bla(_): ruc(_ble_cmd_bla())
+
+    @_on_click_ensure_connected
     def click_btn_cmd_cfg(_):
         ruc(_ble_cmd_cfg())
 
@@ -344,6 +347,11 @@ def _main(page: ft.Page):
                 on_click=click_btn_clear_trace,
                 icon_size=50, icon_color='black',
                 tooltip='clear trace'),
+            ft.IconButton(
+                ft.icons.WHATSHOT,
+                on_click=click_btn_cmd_bla,
+                icon_size=50, icon_color='black',
+                tooltip='bla'),
 
         ], alignment=ft.MainAxisAlignment.CENTER, expand=1),
     )
@@ -510,6 +518,16 @@ def _main(page: ft.Page):
             _t('command FRM successful')
         else:
             _t('error command FRM')
+
+    async def _ble_cmd_bla():
+        rv = await lc.cmd_bla()
+        if rv[0] == 1:
+            _t('error command BLA')
+            return
+        if rv[1] == 0:
+            _t('BLA is disabled')
+        if rv[1] == 1:
+            _t('BLA is enabled')
 
     async def _ble_cmd_led():
         rv = await lc.cmd_led()

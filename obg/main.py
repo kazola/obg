@@ -13,7 +13,7 @@ from obg.main_elements import \
     ruc, \
     dd_devs, \
     lv, \
-    boc, bom, \
+    bom, \
     progress_bar, \
     progress_bar_container, PORT_PROGRESS_BAR
 
@@ -122,10 +122,12 @@ def _main(page: ft.Page):
         ruc(_ble_scan())
 
     def click_btn_connect(_):
-
-        if not dd_devs.value:
-            return
-        m = dd_devs.value.split(' ')[0]
+        # if not dd_devs.value:
+        #     return
+        # m = dd_devs.value
+        # todo: remove this hardcoded
+        m = '4b:45:2d:e9:38:a0 op_mi_4b452de938a0'
+        m = m.split(' ')[0]
         _t('connecting to mac {} chosen from dropdown'.format(m))
         ruc(_ble_connect(m))
 
@@ -134,7 +136,7 @@ def _main(page: ft.Page):
 
     @_on_click_ensure_connected
     def click_btn_cmd_led(_):
-        _t('pressed BTN led')
+        _t('pressed button command LED')
         ruc(_ble_cmd_led())
 
         # AS MANy chain as you want
@@ -192,8 +194,8 @@ def _main(page: ft.Page):
         def _scan_cb(d: BLEDevice, _):
             if d.address in _det:
                 return
-            # todo ---> do the same for mini devices
-            if d.name not in ('optode', ):
+            # todo ---> do the same for core devices
+            if not d.name.startswith('op_'):
                 return
 
             _det.append(d.address)
@@ -206,7 +208,7 @@ def _main(page: ft.Page):
         try:
             scanner = bleak.BleakScanner(_scan_cb, None)
             await scanner.start()
-            await asyncio.sleep(6)
+            await asyncio.sleep(3)
             await scanner.stop()
             _t('scan complete')
 
@@ -215,23 +217,24 @@ def _main(page: ft.Page):
 
     async def _ble_connect(mac):
         _t('connecting to {}'.format(mac))
-        rv = await boc.connect(mac)
+        rv = await bom.connect(mac)
         s = 'connected!' if rv == 0 else 'error connecting'
         _t(s)
 
     async def _ble_disconnect():
-        await boc.disconnect()
+        await bom.disconnect()
         _t('disconnected')
         if platform.system() == 'Linux':
             c = 'bluetoothctl -- disconnect'
             sp.run(c, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
 
     async def _ble_cmd_led():
-        rv = await boc.cmd_led()
-        _t('cmd_led', str(rv))
+        rv = await bom.cmd_led()
+        s = 'OK: cmd LED' if rv == 0 else 'error: cmd LED'
+        _t(s)
 
     async def _ble_is_connected():
-        return await boc.is_connected()
+        return await bom.is_connected()
 
 
 # app can run from here OR setup.py entry point 'fleak'

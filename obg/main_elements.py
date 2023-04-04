@@ -1,13 +1,12 @@
 import flet as ft
 import asyncio
 
-from obg.settings.ble.dev_core import BleOptodeCore
 from obg.settings.ble.dev_mini import BleOptodeMini
 
 
 PORT_PROGRESS_BAR = 56142
 
-boc = BleOptodeCore()
+
 bom = BleOptodeMini()
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)

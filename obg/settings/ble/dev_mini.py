@@ -5,14 +5,18 @@ from bleak import BleakError, BleakClient
 import subprocess as sp
 
 
-# todo > or the other wait around
-UUID_T = '00002325-0000-1000-8000-00805f9b34fb'
-UUID_R = '00002324-0000-1000-8000-00805f9b34fb'
+# these are defined OK
+UUID_T = '00002324-0000-1000-8000-00805f9b34fb'
+UUID_R = '00002325-0000-1000-8000-00805f9b34fb'
 
 
 def _is_cmd_done(c, a):
-    # for Optode Mini devices, tell if BLE command finished
-    pass
+    # for Optode Mini devices
+    if type(a) is bytes:
+        a = a.decode()
+
+    if c == 'l' and a == 'led_ok':
+        return True
 
 
 class BleOptodeMini:    # pragma: no cover
@@ -71,11 +75,9 @@ class BleOptodeMini:    # pragma: no cover
         print('\t dbg_ans:', self.ans)
 
     async def cmd_led(self):
-        # example command configure Optode Mini
-        c = 'led'
-        await self._cmd(c)
+        await self._cmd('l')
         rv = await self._ans_wait()
-        return 0 if rv == b'ok' else 1
+        return 0 if rv == b'led_ok' else 1
 
     async def disconnect(self):
         try:

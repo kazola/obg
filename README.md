@@ -1,20 +1,12 @@
-# FLEAK
+# OBG
 
-Python3 Flet + Bleak GUI console for Lowell Instruments' Bluetooth loggers.
+Python3 GUI to control BLE optodes. OBG stands for "Optode BLE GUI".
 
 
 ## To install
 
-```console
-curl -L https://raw.githubusercontent.com/LowellInstruments/fleak/master/installer/installer_fleak.sh | bash
-```
-
-
-## Changelog
-
-0.8.412 -> first version
-0.8.413 -> added filtering: logger_accepted_types
+I will do this soon.
 
 ## License
 
-This project is licensed under GPL License - see LICENSE file for details.
+All rights reserved.

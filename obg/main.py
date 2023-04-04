@@ -1,5 +1,7 @@
 import os
 import pathlib
+import subprocess as sp
+import platform
 import socket
 import threading
 import time
@@ -7,18 +9,13 @@ import flet as ft
 import bleak
 import asyncio
 from bleak import BLEDevice, BleakError
-from fleak.main_elements import \
+from obg.main_elements import \
     ruc, \
-    dd_loggers, \
-    dd_files, \
+    dd_devs, \
     lv, \
-    lc, \
+    boc, bom, \
     progress_bar, \
-    dlg_file_downloaded, \
     progress_bar_container, PORT_PROGRESS_BAR
-from fleak.settings.ctx import hook_ble_scan_simulated_loggers, hook_ble_hardcoded_mac
-from mat.ble.ble_mat_utils import ble_mat_bluetoothctl_disconnect
-from mat.data_converter import default_parameters, DataConverter
 
 
 def _main(page: ft.Page):
@@ -37,8 +34,8 @@ def _main(page: ft.Page):
                 _u, addr = _sk.recvfrom(1024)
                 v = _u.split(b'/')
 
-                # UDP frame incoming from lowell-mat
-                if v[0] == b'state_dds_ble_download_progress':
+                # UDP frame incoming from somewhere else
+                if v[0] == b'progress_bar_step':
                     p = float(v[1].decode()) / 100
                     progress_bar.controls[1].value = p
                     page.update()
@@ -79,16 +76,16 @@ def _main(page: ft.Page):
 
     page.on_disconnect = _page_on_tab_close
     page.on_error = _page_on_error
-    page.title = "FLET Lowell Instruments BLE console"
+    page.title = "Optode BLE GUI"
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
 
-    def _page_show_dlg_file_downloaded(p):
-        # this gets called at the end of BLE download
-        page.dialog = dlg_file_downloaded
-        dlg_file_downloaded.title = ft.Text('file downloaded OK!')
-        dlg_file_downloaded.content = ft.Text('we left it in\n{}'.format(p))
-        dlg_file_downloaded.open = True
-        page.update()
+    # def _page_show_dlg_file_downloaded(p):
+    #     # this gets called at the end of BLE download
+    #     page.dialog = dlg_file_downloaded
+    #     dlg_file_downloaded.title = ft.Text('file downloaded OK!')
+    #     dlg_file_downloaded.content = ft.Text('we left it in\n{}'.format(p))
+    #     dlg_file_downloaded.open = True
+    #     page.update()
 
     def _page_trace(s):
         lv.controls.append(ft.Text(str(s), size=20))
@@ -98,12 +95,9 @@ def _main(page: ft.Page):
     def click_btn_clear_trace(_):
         lv.controls = []
         _t('cleared trace area')
-        dd_loggers.value = ''
-        dd_loggers.options = []
+        dd_devs.value = ''
+        dd_devs.options = []
         _t('cleared scanned loggers dropdown')
-        dd_files.value = ''
-        dd_files.options = []
-        _t('cleared files dropdown')
         page.update()
 
     def _t(s):
@@ -122,109 +116,29 @@ def _main(page: ft.Page):
         return wrapper
 
     def click_btn_scan(_):
-        dd_loggers.value = ''
-        dd_loggers.options = []
+        dd_devs.value = ''
+        dd_devs.options = []
         page.update()
         ruc(_ble_scan())
 
     def click_btn_connect(_):
-        if hook_ble_scan_simulated_loggers:
-            _t('detected simulation setting, forcing fake mac')
-            m = '11:22:33:44:55:66'
-            ruc(_ble_connect(m))
-            return
 
-        if not dd_loggers.value and not hook_ble_hardcoded_mac:
+        if not dd_devs.value:
             return
-        if dd_loggers.value:
-            m = dd_loggers.value.split(' ')[0]
-            _t('connecting to mac chosen from dropdown')
-        else:
-            m = hook_ble_hardcoded_mac
-            _t('no mac selected, using development one...')
+        m = dd_devs.value.split(' ')[0]
+        _t('connecting to mac {} chosen from dropdown'.format(m))
         ruc(_ble_connect(m))
-
-    @_on_click_ensure_connected
-    def click_btn_cmd_dir(_):
-        dd_files.value = ''
-        dd_files.options = []
-        page.update()
-        ruc(_ble_cmd_dir())
 
     @_on_click_ensure_connected
     def click_btn_disconnect(_): ruc(_ble_disconnect())
 
     @_on_click_ensure_connected
-    def click_btn_cmd_stp(_): ruc(_ble_cmd_stp())
+    def click_btn_cmd_led(_):
+        _t('pressed BTN led')
+        ruc(_ble_cmd_led())
 
-    @_on_click_ensure_connected
-    def click_btn_cmd_sws(_): ruc(_ble_cmd_sws())
-
-    @_on_click_ensure_connected
-    def click_btn_cmd_led(_): ruc(_ble_cmd_led())
-
-    @_on_click_ensure_connected
-    def click_btn_cmd_run(_): ruc(_ble_cmd_run())
-
-    @_on_click_ensure_connected
-    def click_btn_cmd_pfe(_): ruc(_ble_cmd_pfe())
-
-    @_on_click_ensure_connected
-    def click_btn_cmd_rws(_): ruc(_ble_cmd_rws())
-
-    @_on_click_ensure_connected
-    def click_btn_cmd_pft(_): ruc(_ble_cmd_pft())
-
-    @_on_click_ensure_connected
-    def click_btn_cmd_pfg(_): ruc(_ble_cmd_pfg())
-
-    @_on_click_ensure_connected
-    def click_btn_cmd_gdo(_): ruc(_ble_cmd_gdo())
-
-    @_on_click_ensure_connected
-    def click_btn_cmd_frm(_): ruc(_ble_cmd_frm())
-
-    @_on_click_ensure_connected
-    def click_btn_cmd_bla(_): ruc(_ble_cmd_bla())
-
-    @_on_click_ensure_connected
-    def click_btn_cmd_cfg(_):
-        ruc(_ble_cmd_cfg())
-
-    @_on_click_ensure_connected
-    def click_btn_cmd_mts(_):
-        ruc(_ble_cmd_mts())
-        _t('refreshing file dropdown after dummy created')
-        click_btn_cmd_dir(None)
-
-    @_on_click_ensure_connected
-    def click_bnt_cmd_download(_):
-        if not dd_files.value:
-            return
-        ruc(_ble_cmd_download(dd_files.value))
-
-    @_on_click_ensure_connected
-    def click_btn_cmd_delete(_):
-        if not dd_files.value:
-            return
-        ruc(_ble_cmd_delete(dd_files.value))
-        _t('refreshing file dropdown after deletion')
-        click_btn_cmd_dir(None)
-
-    @_on_click_ensure_connected
-    def click_btn_cmd_sts(_):
-        ruc(_ble_cmd_sts())
-        ruc(_ble_cmd_bat())
-        ruc(_ble_cmd_gfv())
-        ruc(_ble_cmd_utm())
-        # ruc(_ble_cmd_log())
-
-        _t('logger datetime before sync')
-        ruc(_ble_cmd_gtm())
-        ruc(_ble_cmd_stm())
-        _t('logger datetime after sync')
-        ruc(_ble_cmd_gtm())
-        # ruc(_ble_cmd_rli())
+        # AS MANy chain as you want
+    #     # ruc(_ble_cmd_rli())
 
     # -----------------
     # page HTML layout
@@ -234,8 +148,7 @@ def _main(page: ft.Page):
 
         ft.Row([
             ft.Column([
-                dd_loggers,
-                dd_files,
+                dd_devs,
                 progress_bar_container
             ], expand=1),
 
@@ -249,109 +162,22 @@ def _main(page: ft.Page):
                 ft.icons.SEARCH,
                 on_click=click_btn_scan,
                 icon_size=50, icon_color='black',
-                tooltip='look for loggers'),
+                tooltip='look for optode devices'),
             ft.IconButton(
                 ft.icons.BLUETOOTH_CONNECTED,
                 on_click=click_btn_connect,
                 icon_size=50, icon_color='lightblue',
-                tooltip='connect to a logger'),
+                tooltip='connect to a optode device'),
             ft.IconButton(
                 ft.icons.BLUETOOTH_DISABLED,
                 on_click=click_btn_disconnect,
                 icon_size=50, icon_color='lightblue',
-                tooltip='disconnect from a logger'),
-            ft.IconButton(
-                ft.icons.PLAY_ARROW,
-                on_click=click_btn_cmd_run,
-                icon_size=50, icon_color='green',
-                tooltip='send RUN command to logger'),
-            ft.IconButton(
-                ft.icons.STOP,
-                on_click=click_btn_cmd_stp,
-                icon_size=50, icon_color='red',
-                tooltip='send STOP command to logger'),
-            ft.IconButton(
-                ft.icons.PLAY_ARROW,
-                on_click=click_btn_cmd_rws,
-                icon_size=50, icon_color='yellow',
-                tooltip='send RWS profiling command to logger'),
-            ft.IconButton(
-                ft.icons.STOP,
-                on_click=click_btn_cmd_sws,
-                icon_size=50, icon_color='yellow',
-                tooltip='send SWS profiling command to logger'),
+                tooltip='disconnect from optode device'),
             ft.IconButton(
                 ft.icons.LIGHTBULB,
-                on_click=click_btn_cmd_pfe,
-                icon_size=50, icon_color='yellow',
-                tooltip='send PFE profiling command to logger'),
-            ft.IconButton(
-                ft.icons.HOURGLASS_TOP,
-                on_click=click_btn_cmd_pft,
-                icon_size=50, icon_color='yellow',
-                tooltip='send PFT command to logger'),
-            ft.IconButton(
-                ft.icons.HOURGLASS_EMPTY,
-                on_click=click_btn_cmd_pfg,
-                icon_size=50, icon_color='yellow',
-                tooltip='send PFG command to logger'),
-        ], alignment=ft.MainAxisAlignment.CENTER, expand=1),
-        ft.Row([
-            ft.IconButton(
-                ft.icons.QUESTION_MARK,
-                on_click=click_btn_cmd_sts,
-                icon_size=50, icon_color='black',
-                tooltip='query logger status'),
-            ft.IconButton(
-                ft.icons.DELETE_FOREVER,
-                on_click=click_btn_cmd_frm,
-                icon_size=50, icon_color='black',
-                tooltip='FORMAT LOGGER'),
-            ft.IconButton(
-                ft.icons.WORKSPACES_FILLED,
                 on_click=click_btn_cmd_led,
-                icon_size=50, icon_color='lightgreen',
-                tooltip='make LED in logger blink'),
-            ft.IconButton(
-                ft.icons.LIST_ALT_OUTLINED,
-                on_click=click_btn_cmd_dir,
-                icon_size=50, icon_color='grey',
-                tooltip='get list of files in a logger'),
-            ft.IconButton(
-                ft.icons.DOWNLOAD,
-                on_click=click_bnt_cmd_download,
                 icon_size=50, icon_color='black',
-                tooltip='get file from logger'),
-            ft.IconButton(
-                ft.icons.DELETE,
-                on_click=click_btn_cmd_delete,
-                icon_size=50, icon_color='red',
-                tooltip='delete file from logger'),
-            ft.IconButton(
-                ft.icons.FILE_UPLOAD,
-                on_click=click_btn_cmd_mts,
-                icon_size=50, icon_color='black',
-                tooltip='create dummy file in logger'),
-            ft.IconButton(
-                ft.icons.BUBBLE_CHART_OUTLINED,
-                on_click=click_btn_cmd_gdo,
-                icon_size=50, icon_color='cyan',
-                tooltip='do an oxygen measurement'),
-            ft.IconButton(
-                ft.icons.DISPLAY_SETTINGS,
-                on_click=click_btn_cmd_cfg,
-                icon_size=50, icon_color='black',
-                tooltip='send MAT.cfg file to logger'),
-            ft.IconButton(
-                ft.icons.PHONELINK_ERASE,
-                on_click=click_btn_clear_trace,
-                icon_size=50, icon_color='black',
-                tooltip='clear trace'),
-            ft.IconButton(
-                ft.icons.WHATSHOT,
-                on_click=click_btn_cmd_bla,
-                icon_size=50, icon_color='black',
-                tooltip='bla'),
+                tooltip='leds'),
 
         ], alignment=ft.MainAxisAlignment.CENTER, expand=1),
     )
@@ -366,27 +192,22 @@ def _main(page: ft.Page):
         def _scan_cb(d: BLEDevice, _):
             if d.address in _det:
                 return
-            if d.name not in ('DO-2', 'DO-1', 'TAP1'):
+            # todo ---> do the same for mini devices
+            if d.name not in ('optode', ):
                 return
 
             _det.append(d.address)
             s = d.address + '   ' + d.name
-            dd_loggers.options.append(ft.dropdown.Option(s))
-            dd_loggers.value = s
+            dd_devs.options.append(ft.dropdown.Option(s))
+            dd_devs.value = s
             page.update()
 
-        _t('scanning for nearby loggers...')
+        _t('scanning for nearby optode devices...')
         try:
-            if hook_ble_scan_simulated_loggers:
-                s = '11:22:33:44:55:66   DO-2'
-                dd_loggers.options.append(ft.dropdown.Option(s))
-                dd_loggers.value = s
-                page.update()
-            else:
-                scanner = bleak.BleakScanner(_scan_cb, None)
-                await scanner.start()
-                await asyncio.sleep(6)
-                await scanner.stop()
+            scanner = bleak.BleakScanner(_scan_cb, None)
+            await scanner.start()
+            await asyncio.sleep(6)
+            await scanner.stop()
             _t('scan complete')
 
         except (asyncio.TimeoutError, BleakError, OSError) as ex:
@@ -394,265 +215,23 @@ def _main(page: ft.Page):
 
     async def _ble_connect(mac):
         _t('connecting to {}'.format(mac))
-        rv = await lc.connect(mac)
+        rv = await boc.connect(mac)
         s = 'connected!' if rv == 0 else 'error connecting'
         _t(s)
 
     async def _ble_disconnect():
-        await lc.disconnect()
+        await boc.disconnect()
         _t('disconnected')
-        ble_mat_bluetoothctl_disconnect()
-
-    async def _ble_cmd_bat():
-        rv = await lc.cmd_bat()
-        if rv[0] == 0:
-            _t('battery: {} mV'.format(rv[1]))
-        else:
-            _t('battery command failed')
-
-    async def _ble_cmd_gfv():
-        rv = await lc.cmd_gfv()
-        if rv[0] == 0:
-            _t('firmware version: {}'.format(rv[1]))
-        else:
-            _t('version command failed')
-
-    async def _ble_cmd_utm():
-        rv = await lc.cmd_utm()
-        if rv[0] == 0:
-            _t('uptime: {}'.format(rv[1]))
-        else:
-            _t('uptime command failed')
-
-    async def _ble_cmd_pfe():
-        rv = await lc.cmd_pfe()
-        if rv[0] == 1:
-            _t('PFE command failed')
-            return
-        if rv[1] == 0:
-            _t('PFE is disabled')
-        if rv[1] == 1:
-            _t('PFE is enabled')
-
-    async def _ble_cmd_pft():
-        rv = await lc.cmd_pft()
-        if rv[0] == 0:
-            _t('command PFT OK = {}'.format(rv[1]))
-        else:
-            _t('error command PFT')
-
-    async def _ble_cmd_pfg():
-        rv = await lc.cmd_pfg()
-        if rv[0] == 0:
-            _t('command PFG OK = {}'.format(rv[1]))
-        else:
-            _t('error command PFG')
-
-    async def _ble_cmd_gtm():
-        rv = await lc.cmd_gtm()
-        if rv[0] == 0:
-            _t('{}'.format(rv[1]))
-        else:
-            _t('get_time command failed')
-
-    async def _ble_cmd_stm():
-        rv = await lc.cmd_stm()
-        if rv == 0:
-            _t('logger time synced OK')
-        else:
-            _t('error syncing logger time')
-
-    async def _ble_cmd_cfg():
-        j = {
-            "DFN": "fle",
-            "TMP": 0, "PRS": 0, "DOS": 1, "DOP": 1, "DOT": 1,
-            "TRI": 10, "ORI": 10, "DRI": 30,
-            "PRR": 1, "PRN": 1,
-            "STM": "2012-11-12 12:14:00",
-            "ETM": "2030-11-12 12:14:20",
-            "LED": 1
-        }
-        rv = await lc.cmd_cfg(j)
-        if rv == 0:
-            _t('logger set MAT.cfg OK')
-        else:
-            _t('error setting MAT.cfg to logger')
-
-    async def _ble_cmd_rli():
-        rv, info = await lc.cmd_rli()
-        if rv:
-            _t('RLI failed')
-            return
-        for k, v in info.items():
-            _t('{}: {}'.format(k, v))
-
-    async def _ble_cmd_dir():
-        rv, ls = await lc.cmd_dir()
-
-        if not ls:
-            _t('logger seems to contain no files')
-            return
-
-        if ls == 'error':
-            _t('logger must be stopped to list files')
-            return
-
-        for filename, size in ls.items():
-            v = filename + ' - ' + str(size)
-            o = ft.dropdown.Option(v)
-            dd_files.options.append(o)
-            # select the last one every time
-            dd_files.value = v
-            page.update()
-
-    async def _ble_cmd_stp():
-        rv = await lc.cmd_stp()
-        if rv == 0:
-            _t('command STOP successful')
-        else:
-            _t('error command STOP')
-
-    async def _ble_cmd_frm():
-        rv = await lc.cmd_frm()
-        if rv == 0:
-            _t('command FRM successful')
-        else:
-            _t('error command FRM')
-
-    async def _ble_cmd_bla():
-        rv = await lc.cmd_bla()
-        if rv[0] == 1:
-            _t('error command BLA')
-            return
-        if rv[1] == 0:
-            _t('BLA is disabled')
-        if rv[1] == 1:
-            _t('BLA is enabled')
+        if platform.system() == 'Linux':
+            c = 'bluetoothctl -- disconnect'
+            sp.run(c, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
 
     async def _ble_cmd_led():
-        rv = await lc.cmd_led()
-        if rv == 0:
-            _t('command LED successful')
-        else:
-            _t('error command LED')
-
-    async def _ble_cmd_gdo():
-        rv = await lc.cmd_gdo()
-        if not rv:
-            _t('sensor DO error')
-        else:
-            _t(str(rv))
-        rv = await lc.cmd_wat()
-        if not rv:
-            _t('sensor WAT error')
-        else:
-            _t('WAT {}'.format(rv))
-
-    async def _ble_cmd_run():
-        rv = await lc.cmd_run()
-        if rv == 0:
-            _t('command RUN successful')
-        else:
-            _t('error command RUN')
-
-    async def _ble_cmd_rws():
-        g = ('1.111111', '2.222222', None, None)
-        rv = await lc.cmd_rws(g)
-        if rv == 0:
-            _t('command RWS successful')
-        else:
-            _t('error command RWS')
-
-    async def _ble_cmd_sws():
-        g = ('-3.333333', '-4.444444', None, None)
-        rv = await lc.cmd_sws(g)
-        if rv == 0:
-            _t('command SWS successful')
-        else:
-            _t('error command SWS')
-
-    async def _ble_cmd_mts():
-        _t('started command MTS...')
-        rv = await lc.cmd_mts()
-        if rv == 0:
-            _t('command MTS successful')
-        else:
-            _t('error command MTS')
-
-    async def _ble_cmd_sts():
-        rv = await lc.cmd_sts()
-        s = 'logger is currently {}'.format(rv[1])
-        _t(s)
+        rv = await boc.cmd_led()
+        _t('cmd_led', str(rv))
 
     async def _ble_is_connected():
-        return await lc.is_connected()
-
-    async def _ble_cmd_download(file_to_dl):
-        filename, _, size = file_to_dl.split()
-
-        rv = await lc.cmd_dwg(filename)
-        if rv != 0:
-            _t('error DWG')
-            return
-
-        # -----------------------------
-        # progress bar & download file
-        # -----------------------------
-        _t_dl = time.perf_counter()
-        progress_bar.value = 0
-        progress_bar.visible = True
-        page.update()
-        ip = '127.0.0.1'
-        port = PORT_PROGRESS_BAR
-        size = int(size)
-
-        # this DWL command sends progress UDP packets
-        rv = await lc.cmd_dwl(size, ip, port)
-        elapsed_time = time.perf_counter() - _t_dl
-        speed = (size / elapsed_time) / 1000
-        _t('speed {:.2f} KBps'.format(speed))
-        progress_bar.visible = False
-        page.update()
-
-        # leave if no success
-        if rv[0] != 0:
-            _t('seems error download')
-            return
-
-        # save file locally, remove if existing
-        s = 'download complete {}, {} bytes'
-        _t(s.format(filename, size))
-        p = str(pathlib.Path.home())
-        if hook_ble_scan_simulated_loggers:
-            m = '11-22-33-44-55-66'
-        else:
-            m = lc.cli.address.replace(':', '-')
-        p = p + '/Downloads/dl_fleak/{}'.format(m)
-        os.makedirs(p, exist_ok=True)
-        p = p + '/{}'.format(filename)
-        if os.path.isfile(p) and filename.startswith('test'):
-            _e = 'test file {} already exists locally, removing it'
-            _t(_e.format(os.path.basename(p)))
-            os.unlink(p)
-        with open(p, 'wb') as f:
-            f.write(rv[1])
-        _page_show_dlg_file_downloaded(p)
-
-        # try to convert
-        parameters = default_parameters()
-        try:
-            DataConverter(p, parameters).convert()
-            _t('converted file {}'.format(p))
-        except (Exception, ):
-            _t('error converting file {}'.format(p))
-
-    async def _ble_cmd_delete(f):
-        name, _, __ = f.split()
-        rv = await lc.cmd_del(name)
-        if rv == 0:
-            _t('file {} deleted OK'.format(f))
-        else:
-            _t('error deleting file {}'.format(f))
+        return await boc.is_connected()
 
 
 # app can run from here OR setup.py entry point 'fleak'

@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/fleak.iml" filepath="$PROJECT_DIR$/.idea/fleak.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../lowell-mat/.idea/lowell-mat.iml" filepath="$PROJECT_DIR$/../lowell-mat/.idea/lowell-mat.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/obg.iml" filepath="$PROJECT_DIR$/.idea/obg.iml" />
     </modules>
   </component>
 </project>

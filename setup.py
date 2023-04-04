@@ -2,24 +2,21 @@ from setuptools import setup, find_packages
 
 
 setup(
-    name='fleak',
-    version='0.8.413',
-    description='Web App for Lowell Instruments BLE loggers',
-    url='https://github.com/LowellInstruments/fleak',
-    author='Lowell Instruments',
-    author_email='joaquim@lowellinstruments.com',
+    name='obg',
+    version='0.1',
+    description='Web App to control MBL Optode BLE devices via GUI',
+    url='https://github.com/kazola/obg',
+    author='Joaquim Oller',
+    author_email='joller@mbl.edu.com',
     entry_points={
         'console_scripts': [
             # exe_name=package.pyfilename:functionname
-            'fleak=fleak.main:main',
+            'obg=obg.main:main',
         ],
     },
     packages=find_packages(),
     install_requires=[
         'flet',
         'bleak',
-        'h5py',
-        'humanize',
-        'numpy'
     ]
 )

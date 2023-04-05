@@ -13,7 +13,7 @@ from obg.main_elements import \
     ruc, \
     dd_devs, \
     lv, \
-    bom, \
+    bom, boc, \
     progress_bar, \
     progress_bar_container, PORT_PROGRESS_BAR
 
@@ -126,7 +126,9 @@ def _main(page: ft.Page):
         #     return
         # m = dd_devs.value
         # todo: remove this hardcoded
-        m = '4b:45:2d:e9:38:a0 op_mi_4b452de938a0'
+        # m_op_mi = '4b:45:2d:e9:38:a0 op_mi_4b452de938a0'
+        m_op_co = 'F0:BC:8C:34:15:14 op_co'
+        m = m_op_co
         m = m.split(' ')[0]
         _t('connecting to mac {} chosen from dropdown'.format(m))
         ruc(_ble_connect(m))
@@ -135,12 +137,14 @@ def _main(page: ft.Page):
     def click_btn_disconnect(_): ruc(_ble_disconnect())
 
     @_on_click_ensure_connected
-    def click_btn_cmd_led(_):
-        _t('pressed button command LED')
-        ruc(_ble_cmd_led())
+    def click_btn_cmd_run(_):
+        _t('sending cmd RUN "/"')
+        ruc(_ble_cmd_run())
 
-        # AS MANy chain as you want
-    #     # ruc(_ble_cmd_rli())
+    @_on_click_ensure_connected
+    def click_btn_cmd_inc_time(_):
+        _t('sending cmd INC_TIME "i"')
+        ruc(_ble_cmd_inc_time())
 
     # -----------------
     # page HTML layout
@@ -175,13 +179,43 @@ def _main(page: ft.Page):
                 on_click=click_btn_disconnect,
                 icon_size=50, icon_color='lightblue',
                 tooltip='disconnect from optode device'),
-            ft.IconButton(
-                ft.icons.LIGHTBULB,
-                on_click=click_btn_cmd_led,
-                icon_size=50, icon_color='black',
-                tooltip='leds'),
-
         ], alignment=ft.MainAxisAlignment.CENTER, expand=1),
+        ft.Row([
+            ft.Text(
+                "core",
+                size=50,
+                color=ft.colors.BLACK,
+                bgcolor=None,
+                weight=ft.FontWeight.NORMAL,
+            ),
+            ft.IconButton(
+                ft.icons.ARROW_UPWARD,
+                on_click=click_btn_cmd_inc_time,
+                icon_size=50,
+                icon_color='black',
+                tooltip='increase time'),
+            ft.IconButton(
+                ft.icons.PLAY_ARROW,
+                on_click=click_btn_cmd_run,
+                icon_size=50,
+                icon_color='green',
+                tooltip='run'),
+        ], alignment=ft.MainAxisAlignment.CENTER, expand=1),
+        # ft.Row([
+        #     ft.Text(
+        #         "mini",
+        #         size=50,
+        #         color=ft.colors.BLACK,
+        #         bgcolor=None,
+        #         weight=ft.FontWeight.NORMAL,
+        #     ),
+        #     # ft.IconButton(
+        #     #     ft.icons.LIGHTBULB,
+        #     #     on_click=click_btn_cmd_led,
+        #     #     icon_size=50,
+        #     #     icon_color='orange',
+        #     #     tooltip='blink leds'),
+        # ], alignment=ft.MainAxisAlignment.CENTER, expand=1),
     )
 
     # ---------------------
@@ -194,7 +228,6 @@ def _main(page: ft.Page):
         def _scan_cb(d: BLEDevice, _):
             if d.address in _det:
                 return
-            # todo ---> do the same for core devices
             if not d.name.startswith('op_'):
                 return
 
@@ -217,24 +250,29 @@ def _main(page: ft.Page):
 
     async def _ble_connect(mac):
         _t('connecting to {}'.format(mac))
-        rv = await bom.connect(mac)
+        rv = await boc.connect(mac)
         s = 'connected!' if rv == 0 else 'error connecting'
         _t(s)
 
     async def _ble_disconnect():
-        await bom.disconnect()
+        await boc.disconnect()
         _t('disconnected')
         if platform.system() == 'Linux':
             c = 'bluetoothctl -- disconnect'
             sp.run(c, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
 
-    async def _ble_cmd_led():
-        rv = await bom.cmd_led()
-        s = 'OK: cmd LED' if rv == 0 else 'error: cmd LED'
+    async def _ble_cmd_run():
+        rv = await boc.cmd_run()
+        s = 'OK cmd RUN' if rv == 0 else 'error cmd RUN'
+        _t(s)
+
+    async def _ble_cmd_inc_time():
+        rv = await boc.cmd_inc_time()
+        s = 'OK cmd INC_TIME' if rv == 0 else 'error cmd INC_TIME'
         _t(s)
 
     async def _ble_is_connected():
-        return await bom.is_connected()
+        return await boc.is_connected()
 
 
 # app can run from here OR setup.py entry point 'fleak'

@@ -14,6 +14,7 @@ from obg.main_elements import \
     bom, boc, \
     progress_bar, \
     progress_bar_container, PORT_PROGRESS_BAR
+from obg.settings.ctx import show_mini_commands
 
 
 def _main(page: ft.Page):
@@ -132,7 +133,8 @@ def _main(page: ft.Page):
         ruc(_ble_connect(m))
 
     @_on_click_ensure_connected
-    def click_btn_disconnect(_): ruc(_ble_disconnect())
+    def click_btn_disconnect(_):
+        ruc(_ble_disconnect())
 
     @_on_click_ensure_connected
     def click_btn_cmd_run(_):
@@ -145,14 +147,33 @@ def _main(page: ft.Page):
         ruc(_ble_cmd_inc_time())
 
     @_on_click_ensure_connected
-    def click_btn_cmd_status(_):
+    def click_btn_cmd_query(_):
         _t('sending cmd STATUS')
         ruc(_ble_cmd_status())
+        _t('sending cmd GET SCANNER MACS')
+        ruc(_ble_cmd_macs())
+        _t('sending cmd GET BATTERY LEVEL')
+        ruc(_ble_cmd_battery())
 
     @_on_click_ensure_connected
-    def click_btn_cmd_macs(_):
-        _t('sending cmd SCANNER MACS')
-        ruc(_ble_cmd_macs())
+    def click_btn_cmd_led_on(_):
+        _t('sending cmd LED_ON')
+        ruc(_ble_cmd_led_on())
+
+    @_on_click_ensure_connected
+    def click_btn_cmd_led_off(_):
+        _t('sending cmd LED_OFF')
+        ruc(_ble_cmd_led_off())
+
+    @_on_click_ensure_connected
+    def click_btn_cmd_motor_left(_):
+        _t('sending cmd MOTOR_LEFT')
+        ruc(_ble_cmd_motor_left())
+
+    @_on_click_ensure_connected
+    def click_btn_cmd_motor_right(_):
+        _t('sending cmd MOTOR_RIGHT')
+        ruc(_ble_cmd_motor_right())
 
     # -----------------
     # page HTML layout
@@ -198,18 +219,36 @@ def _main(page: ft.Page):
             ),
             ft.IconButton(
                 ft.icons.QUESTION_MARK,
-                on_click=click_btn_cmd_status,
+                on_click=click_btn_cmd_query,
                 icon_size=50,
                 icon_color='black',
                 tooltip='get status'),
             ft.IconButton(
-                ft.icons.SENSORS,
-                on_click=click_btn_cmd_macs,
+                ft.icons.FLASHLIGHT_ON,
+                on_click=click_btn_cmd_led_on,
                 icon_size=50,
                 icon_color='black',
-                tooltip='get mini macs'),
+                tooltip='led ON'),
             ft.IconButton(
-                ft.icons.ARROW_UPWARD,
+                ft.icons.FLASHLIGHT_OFF,
+                on_click=click_btn_cmd_led_off,
+                icon_size=50,
+                icon_color='black',
+                tooltip='led OFF'),
+            ft.IconButton(
+                ft.icons.KEYBOARD_ARROW_LEFT,
+                on_click=click_btn_cmd_motor_left,
+                icon_size=50,
+                icon_color='black',
+                tooltip='motor left'),
+            ft.IconButton(
+                ft.icons.KEYBOARD_ARROW_RIGHT,
+                on_click=click_btn_cmd_motor_right,
+                icon_size=50,
+                icon_color='black',
+                tooltip='motor right'),
+            ft.IconButton(
+                ft.icons.MORE_TIME,
                 on_click=click_btn_cmd_inc_time,
                 icon_size=50,
                 icon_color='black',
@@ -220,23 +259,27 @@ def _main(page: ft.Page):
                 icon_size=50,
                 icon_color='green',
                 tooltip='run'),
-        ], alignment=ft.MainAxisAlignment.CENTER, expand=1),
-        # ft.Row([
-        #     ft.Text(
-        #         "mini",
-        #         size=50,
-        #         color=ft.colors.BLACK,
-        #         bgcolor=None,
-        #         weight=ft.FontWeight.NORMAL,
-        #     ),
-        #     # ft.IconButton(
-        #     #     ft.icons.LIGHTBULB,
-        #     #     on_click=click_btn_cmd_led,
-        #     #     icon_size=50,
-        #     #     icon_color='orange',
-        #     #     tooltip='blink leds'),
-        # ], alignment=ft.MainAxisAlignment.CENTER, expand=1),
+        ], alignment=ft.MainAxisAlignment.CENTER, expand=1)
     )
+
+    if show_mini_commands:
+        page.add(
+            ft.Row([
+                ft.Text(
+                    "mini",
+                    size=50,
+                    color=ft.colors.BLACK,
+                    bgcolor=None,
+                    weight=ft.FontWeight.NORMAL,
+                ),
+                # ft.IconButton(
+                #     ft.icons.LIGHTBULB,
+                #     on_click=click_btn_cmd_led,
+                #     icon_size=50,
+                #     icon_color='orange',
+                #     tooltip='blink leds'),
+            ], alignment=ft.MainAxisAlignment.CENTER, expand=1)
+        )
 
     # ---------------------
     # Bluetooth functions
@@ -283,27 +326,67 @@ def _main(page: ft.Page):
 
     async def _ble_cmd_run():
         rv = await boc.cmd_run()
-        s = 'OK cmd RUN' if rv == 0 else 'error cmd RUN'
-        _t(s)
+        if rv == 0:
+            _t('    OK cmd RUN')
+        else:
+            _t('    error cmd RUN')
 
     async def _ble_cmd_inc_time():
         rv = await boc.cmd_inc_time()
-        s = 'OK cmd INC_TIME' if rv == 0 else 'error cmd INC_TIME'
-        _t(s)
+        if rv == 0:
+            _t('    OK cmd INC_TIME')
+        else:
+            _t('    error cmd INC_TIME')
 
     async def _ble_cmd_status():
         rv, v = await boc.cmd_status()
         if rv == 0:
-            _t('OK cmd STATUS {}'.format(v))
-            return
-        _t('error cmd STATUS')
+            _t('    OK cmd STATUS {}'.format(v))
+        else:
+            _t('    error cmd STATUS')
 
     async def _ble_cmd_macs():
         rv, v = await boc.cmd_macs()
         if rv == 0:
-            _t('OK cmd MAC {}'.format(v))
-            return
-        _t('error cmd MAC')
+            _t('    OK cmd MAC {}'.format(v))
+        else:
+            _t('    error cmd MAC')
+
+    async def _ble_cmd_battery():
+        rv, v = await boc.cmd_battery()
+        if rv == 0:
+            _t('    OK cmd BATTERY {}'.format(v))
+        else:
+            _t('    error cmd BATTERY')
+
+    async def _ble_cmd_led_on():
+        rv = await boc.cmd_led_on()
+        if rv == 0:
+            _t('    OK cmd LED_ON')
+        else:
+            _t('    error cmd LED_ON')
+
+    async def _ble_cmd_led_off():
+        rv = await boc.cmd_led_off()
+        if rv == 0:
+            _t('    OK cmd LED_OFF')
+        else:
+            _t('    error cmd LED_OFF')
+
+    async def _ble_cmd_motor_left():
+        rv = await boc.cmd_motor_left()
+        print(rv, v)
+        if rv == 0:
+            _t('    OK cmd MOTOR_LEFT')
+        else:
+            _t('    error cmd MOTOR_LEFT')
+
+    async def _ble_cmd_motor_right():
+        rv = await boc.cmd_motor_right()
+        if rv == 0:
+            _t('    OK cmd MOTOR_RIGHT')
+        else:
+            _t('    error cmd MOTOR_RIGHT')
 
     async def _ble_is_connected():
         return await boc.is_connected()

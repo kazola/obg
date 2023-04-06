@@ -6,8 +6,8 @@ import subprocess as sp
 
 
 g_states_core = (
-    'BOOTING',
-    'READY_TO_CONF',
+    'st_booting',
+    'st_ready_to_conf',
 )
 
 
@@ -19,16 +19,28 @@ UUID_R = '6E400002-B5A3-F393-E0A9-E50E24DCCA9E'
 def _is_cmd_done(c, a):
     # for Optode Core devices
     rv = False
+
     if type(a) is bytes:
         a = a.decode()
-    if c == '/' and a == 'run_ok':
+
+    if c == 'ru' and a == 'run_ok':
         rv = True
     # increase time
-    if c == 'i' and a == 'inc_time_ok':
+    if c == 'it' and a == 'inc_time_ok':
         rv = True
-    if c == 'm' and len(a) == 17:
+    if c == 'ma' and len(a) == 17:
         rv = True
-    if c == 's' and a in g_states_core:
+    if c == 'st' and a in g_states_core:
+        rv = True
+    if c == 'lo' and a == 'lo_ok':
+        rv = True
+    if c == 'lf' and a == 'lf_ok':
+        rv = True
+    if c == 'ml' and a == 'ml_ok':
+        rv = True
+    if c == 'mr' and a == 'mr_ok':
+        rv = True
+    if c == 'ba' and int(a):
         rv = True
 
     # debug
@@ -93,28 +105,55 @@ class BleOptodeCore:    # pragma: no cover
         print('\t dbg_ans:', self.ans)
 
     async def cmd_run(self):
-        await self._cmd('/')
+        await self._cmd('ru')
         rv = await self._ans_wait()
         return 0 if rv == b'run_ok' else 1
 
     async def cmd_inc_time(self):
-        await self._cmd('i')
+        await self._cmd('it')
         rv = await self._ans_wait()
         return 0 if rv == b'inc_time_ok' else 1
 
     async def cmd_status(self):
-        await self._cmd('s')
+        await self._cmd('st')
         rv = await self._ans_wait()
         if rv and rv.decode() in g_states_core:
             return 0, rv.decode()
         return 1, ''
 
     async def cmd_macs(self):
-        await self._cmd('m')
+        await self._cmd('ma')
         rv = await self._ans_wait()
         if len(rv) == 17:
             return 0, rv.decode()
         return 1, ''
+
+    async def cmd_battery(self):
+        await self._cmd('ba')
+        rv = await self._ans_wait()
+        if len(rv) == 4:
+            return 0, rv.decode()
+        return 1, ''
+
+    async def cmd_led_on(self):
+        await self._cmd('lo')
+        rv = await self._ans_wait()
+        return 0 if rv == b'lo_ok' else 1
+
+    async def cmd_led_off(self):
+        await self._cmd('lf')
+        rv = await self._ans_wait()
+        return 0 if rv == b'lf_ok' else 1
+
+    async def cmd_motor_left(self):
+        await self._cmd('ml')
+        rv = await self._ans_wait()
+        return 0 if rv == b'ml_ok' else 1
+
+    async def cmd_motor_right(self):
+        await self._cmd('mr')
+        rv = await self._ans_wait()
+        return 0 if rv == b'mr_ok' else 1
 
     async def disconnect(self):
         try:

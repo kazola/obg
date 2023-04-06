@@ -5,6 +5,12 @@ from bleak import BleakError, BleakClient
 import subprocess as sp
 
 
+g_states_core = (
+    'BOOTING',
+    'READY_TO_CONF',
+)
+
+
 # these are set OK for optode core
 UUID_T = '6E400003-B5A3-F393-E0A9-E50E24DCCA9E'
 UUID_R = '6E400002-B5A3-F393-E0A9-E50E24DCCA9E'
@@ -20,8 +26,14 @@ def _is_cmd_done(c, a):
     # increase time
     if c == 'i' and a == 'inc_time_ok':
         rv = True
-    if rv:
-        print(c, a)
+    if c == 'm' and len(a) == 17:
+        rv = True
+    if c == 's' and a in g_states_core:
+        rv = True
+
+    # debug
+    # if rv:
+    #     print(c, a)
     return rv
 
 
@@ -90,6 +102,20 @@ class BleOptodeCore:    # pragma: no cover
         rv = await self._ans_wait()
         return 0 if rv == b'inc_time_ok' else 1
 
+    async def cmd_status(self):
+        await self._cmd('s')
+        rv = await self._ans_wait()
+        if rv and rv.decode() in g_states_core:
+            return 0, rv.decode()
+        return 1, ''
+
+    async def cmd_macs(self):
+        await self._cmd('m')
+        rv = await self._ans_wait()
+        if len(rv) == 17:
+            return 0, rv.decode()
+        return 1, ''
+
     async def disconnect(self):
         try:
             await self.cli.disconnect()
@@ -99,7 +125,6 @@ class BleOptodeCore:    # pragma: no cover
     async def connect(self, mac):
         def c_rx(_: int, b: bytearray):
             self.ans += b
-
 
         till = time.perf_counter() + 30
         self.cli = BleakClient(mac)

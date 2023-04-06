@@ -1,10 +1,8 @@
 import os
-import pathlib
 import subprocess as sp
 import platform
 import socket
 import threading
-import time
 import flet as ft
 import bleak
 import asyncio
@@ -138,13 +136,23 @@ def _main(page: ft.Page):
 
     @_on_click_ensure_connected
     def click_btn_cmd_run(_):
-        _t('sending cmd RUN "/"')
+        _t('sending cmd RUN')
         ruc(_ble_cmd_run())
 
     @_on_click_ensure_connected
     def click_btn_cmd_inc_time(_):
-        _t('sending cmd INC_TIME "i"')
+        _t('sending cmd INC_TIME')
         ruc(_ble_cmd_inc_time())
+
+    @_on_click_ensure_connected
+    def click_btn_cmd_status(_):
+        _t('sending cmd STATUS')
+        ruc(_ble_cmd_status())
+
+    @_on_click_ensure_connected
+    def click_btn_cmd_macs(_):
+        _t('sending cmd SCANNER MACS')
+        ruc(_ble_cmd_macs())
 
     # -----------------
     # page HTML layout
@@ -188,6 +196,18 @@ def _main(page: ft.Page):
                 bgcolor=None,
                 weight=ft.FontWeight.NORMAL,
             ),
+            ft.IconButton(
+                ft.icons.QUESTION_MARK,
+                on_click=click_btn_cmd_status,
+                icon_size=50,
+                icon_color='black',
+                tooltip='get status'),
+            ft.IconButton(
+                ft.icons.SENSORS,
+                on_click=click_btn_cmd_macs,
+                icon_size=50,
+                icon_color='black',
+                tooltip='get mini macs'),
             ft.IconButton(
                 ft.icons.ARROW_UPWARD,
                 on_click=click_btn_cmd_inc_time,
@@ -270,6 +290,20 @@ def _main(page: ft.Page):
         rv = await boc.cmd_inc_time()
         s = 'OK cmd INC_TIME' if rv == 0 else 'error cmd INC_TIME'
         _t(s)
+
+    async def _ble_cmd_status():
+        rv, v = await boc.cmd_status()
+        if rv == 0:
+            _t('OK cmd STATUS {}'.format(v))
+            return
+        _t('error cmd STATUS')
+
+    async def _ble_cmd_macs():
+        rv, v = await boc.cmd_macs()
+        if rv == 0:
+            _t('OK cmd MAC {}'.format(v))
+            return
+        _t('error cmd MAC')
 
     async def _ble_is_connected():
         return await boc.is_connected()

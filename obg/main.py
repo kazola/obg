@@ -254,9 +254,9 @@ def _main(page: ft.Page):
             ft.Text(
                 "core",
                 size=50,
-                color=ft.colors.BLACK,
+                color=ft.colors.LIGHT_GREEN_400,
                 bgcolor=None,
-                weight=ft.FontWeight.NORMAL,
+                weight=ft.FontWeight.BOLD,
             ),
             ft.IconButton(
                 ft.icons.QUESTION_MARK,
@@ -298,7 +298,7 @@ def _main(page: ft.Page):
                 ft.icons.PLAY_ARROW,
                 on_click=click_btn_cmd_run,
                 icon_size=50,
-                icon_color='green',
+                icon_color='black',
                 tooltip='run'),
         ], alignment=ft.MainAxisAlignment.CENTER, expand=1)
     )
@@ -309,9 +309,9 @@ def _main(page: ft.Page):
                 ft.Text(
                     "mini ",
                     size=50,
-                    color=ft.colors.BLACK,
+                    color=ft.colors.LIGHT_GREEN_400,
                     bgcolor=None,
-                    weight=ft.FontWeight.NORMAL,
+                    weight=ft.FontWeight.BOLD,
                 ),
                 ft.IconButton(
                     ft.icons.DISPLAY_SETTINGS,

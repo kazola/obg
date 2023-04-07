@@ -15,7 +15,18 @@ def _is_cmd_done(c, a):
     if type(a) is bytes:
         a = a.decode()
 
-    if c == 'l' and a == 'led_ok':
+    # debug
+    # print(c, a)
+
+    if c == 'le' and a == 'le_ok':
+        return True
+    if c == 'di' and a in ('di_of', 'di_on'):
+        return True
+    if c == 'do' and a == 'do_ok':
+        return True
+    if c == 'wi' and a in ('wi_of', 'wi_on'):
+        return True
+    if c == 'wo' and a == 'wo_ok':
         return True
 
 
@@ -39,7 +50,7 @@ class BleOptodeMini:    # pragma: no cover
             self.ans = bytes()
 
         if self.dbg_ans:
-            print('<', c)
+            print('<-', c)
 
         await self.cli.write_gatt_char(UUID_R, c.encode())
 
@@ -61,7 +72,7 @@ class BleOptodeMini:    # pragma: no cover
                 if self.dbg_ans:
                     # debug good answers
                     elapsed = time.time() - start
-                    print('>', self.ans)
+                    print('->', self.ans)
                     print('\ttook {} secs'.format(int(elapsed)))
                 return self.ans
 
@@ -74,10 +85,34 @@ class BleOptodeMini:    # pragma: no cover
             return
         print('\t dbg_ans:', self.ans)
 
-    async def cmd_led(self):
-        await self._cmd('l')
+    async def cmd_display_in(self):
+        await self._cmd('di')
         rv = await self._ans_wait()
-        return 0 if rv == b'led_ok' else 1
+        if rv in (b'di_on', b'di_of'):
+            return 0, rv
+        return 1, None
+
+    async def cmd_display_out(self):
+        await self._cmd('do')
+        rv = await self._ans_wait()
+        return 0 if rv == b'do_ok' else 1
+
+    async def cmd_wifi_in(self):
+        await self._cmd('wi')
+        rv = await self._ans_wait()
+        if rv in (b'wi_on', b'wi_of'):
+            return 0, rv
+        return 1, None
+
+    async def cmd_wifi_out(self):
+        await self._cmd('wo')
+        rv = await self._ans_wait()
+        return 0 if rv == b'wo_ok' else 1
+
+    async def cmd_leds(self):
+        await self._cmd('le')
+        rv = await self._ans_wait()
+        return 0 if rv == b'le_ok' else 1
 
     async def disconnect(self):
         try:

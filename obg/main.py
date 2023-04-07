@@ -17,6 +17,11 @@ from obg.main_elements import \
 from obg.settings.ctx import show_mini_commands
 
 
+# bdc: Bluetooth device controller, can be core or mini
+g_bdc = None
+g_bdc_type = ''
+
+
 def _main(page: ft.Page):
 
     def _th_fxn_progress_bar_display():
@@ -93,10 +98,8 @@ def _main(page: ft.Page):
 
     def click_btn_clear_trace(_):
         lv.controls = []
-        _t('cleared trace area')
         dd_devs.value = ''
         dd_devs.options = []
-        _t('cleared scanned loggers dropdown')
         page.update()
 
     def _t(s):
@@ -121,13 +124,21 @@ def _main(page: ft.Page):
         ruc(_ble_scan())
 
     def click_btn_connect(_):
+        global g_bdc
+        global g_bdc_type
+
+        # todo: remove this hardcoded
         # if not dd_devs.value:
         #     return
         # m = dd_devs.value
-        # todo: remove this hardcoded
-        # m_op_mi = '4b:45:2d:e9:38:a0 op_mi_4b452de938a0'
-        m_op_co = 'F0:BC:8C:34:15:14 op_co'
-        m = m_op_co
+        # m = 'F0:BC:8C:34:15:14 op_co'
+        m = '4b:45:2d:e9:38:a0 op_mi_4b452de938a0'
+        if 'op_mi' in m:
+            g_bdc = bom
+            g_bdc_type = 'optode device type mini'
+        else:
+            g_bdc = boc
+            g_bdc_type = 'optode device type core'
         m = m.split(' ')[0]
         _t('connecting to mac {} chosen from dropdown'.format(m))
         ruc(_ble_connect(m))
@@ -175,6 +186,31 @@ def _main(page: ft.Page):
         _t('sending cmd MOTOR_RIGHT')
         ruc(_ble_cmd_motor_right())
 
+    @_on_click_ensure_connected
+    def click_btn_cmd_display_in(_):
+        _t('sending cmd DISPLAY_IN')
+        ruc(_ble_cmd_mini_display_in())
+
+    @_on_click_ensure_connected
+    def click_btn_cmd_display_out(_):
+        _t('sending cmd DISPLAY_OUT')
+        ruc(_ble_cmd_mini_display_out())
+
+    @_on_click_ensure_connected
+    def click_btn_cmd_wifi_in(_):
+        _t('sending cmd WIFI_IN')
+        ruc(_ble_cmd_mini_wifi_in())
+
+    @_on_click_ensure_connected
+    def click_btn_cmd_wifi_out(_):
+        _t('sending cmd WIFI_OUT')
+        ruc(_ble_cmd_mini_wifi_out())
+
+    @_on_click_ensure_connected
+    def click_btn_cmd_leds(_):
+        _t('sending cmd LEDS')
+        ruc(_ble_cmd_leds())
+
     # -----------------
     # page HTML layout
     # -----------------
@@ -208,6 +244,11 @@ def _main(page: ft.Page):
                 on_click=click_btn_disconnect,
                 icon_size=50, icon_color='lightblue',
                 tooltip='disconnect from optode device'),
+            ft.IconButton(
+                ft.icons.DELETE,
+                on_click=click_btn_clear_trace,
+                icon_size=50, icon_color='grey',
+                tooltip='clear trace'),
         ], alignment=ft.MainAxisAlignment.CENTER, expand=1),
         ft.Row([
             ft.Text(
@@ -266,18 +307,42 @@ def _main(page: ft.Page):
         page.add(
             ft.Row([
                 ft.Text(
-                    "mini",
+                    "mini ",
                     size=50,
                     color=ft.colors.BLACK,
                     bgcolor=None,
                     weight=ft.FontWeight.NORMAL,
                 ),
-                # ft.IconButton(
-                #     ft.icons.LIGHTBULB,
-                #     on_click=click_btn_cmd_led,
-                #     icon_size=50,
-                #     icon_color='orange',
-                #     tooltip='blink leds'),
+                ft.IconButton(
+                    ft.icons.DISPLAY_SETTINGS,
+                    on_click=click_btn_cmd_display_in,
+                    icon_size=50,
+                    icon_color='black',
+                    tooltip='read display input'),
+                ft.IconButton(
+                    ft.icons.ARROW_UPWARD,
+                    on_click=click_btn_cmd_display_out,
+                    icon_size=50,
+                    icon_color='black',
+                    tooltip='write display output'),
+                ft.IconButton(
+                    ft.icons.NETWORK_WIFI,
+                    on_click=click_btn_cmd_wifi_in,
+                    icon_size=50,
+                    icon_color='black',
+                    tooltip='read wifi input'),
+                ft.IconButton(
+                    ft.icons.ARROW_UPWARD,
+                    on_click=click_btn_cmd_wifi_out,
+                    icon_size=50,
+                    icon_color='black',
+                    tooltip='write wifi output'),
+                ft.IconButton(
+                    ft.icons.FLASHLIGHT_ON,
+                    on_click=click_btn_cmd_leds,
+                    icon_size=50,
+                    icon_color='black',
+                    tooltip='led dance'),
             ], alignment=ft.MainAxisAlignment.CENTER, expand=1)
         )
 
@@ -313,83 +378,119 @@ def _main(page: ft.Page):
 
     async def _ble_connect(mac):
         _t('connecting to {}'.format(mac))
-        rv = await boc.connect(mac)
-        s = 'connected!' if rv == 0 else 'error connecting'
-        _t(s)
+        rv = await g_bdc.connect(mac)
+        if rv == 0:
+            _t('    connected to {}'.format(g_bdc_type))
+        else:
+            _t('    error connecting')
 
     async def _ble_disconnect():
-        await boc.disconnect()
+        await g_bdc.disconnect()
         _t('disconnected')
         if platform.system() == 'Linux':
             c = 'bluetoothctl -- disconnect'
             sp.run(c, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
 
     async def _ble_cmd_run():
-        rv = await boc.cmd_run()
+        rv = await g_bdc.cmd_run()
         if rv == 0:
             _t('    OK cmd RUN')
         else:
             _t('    error cmd RUN')
 
     async def _ble_cmd_inc_time():
-        rv = await boc.cmd_inc_time()
+        rv = await g_bdc.cmd_inc_time()
         if rv == 0:
             _t('    OK cmd INC_TIME')
         else:
             _t('    error cmd INC_TIME')
 
     async def _ble_cmd_status():
-        rv, v = await boc.cmd_status()
+        rv, v = await g_bdc.cmd_status()
         if rv == 0:
             _t('    OK cmd STATUS {}'.format(v))
         else:
             _t('    error cmd STATUS')
 
     async def _ble_cmd_macs():
-        rv, v = await boc.cmd_macs()
+        rv, v = await g_bdc.cmd_macs()
         if rv == 0:
             _t('    OK cmd MAC {}'.format(v))
         else:
             _t('    error cmd MAC')
 
     async def _ble_cmd_battery():
-        rv, v = await boc.cmd_battery()
+        rv, v = await g_bdc.cmd_battery()
         if rv == 0:
             _t('    OK cmd BATTERY {}'.format(v))
         else:
             _t('    error cmd BATTERY')
 
     async def _ble_cmd_led_on():
-        rv = await boc.cmd_led_on()
+        rv = await g_bdc.cmd_led_on()
         if rv == 0:
             _t('    OK cmd LED_ON')
         else:
             _t('    error cmd LED_ON')
 
     async def _ble_cmd_led_off():
-        rv = await boc.cmd_led_off()
+        rv = await g_bdc.cmd_led_off()
         if rv == 0:
             _t('    OK cmd LED_OFF')
         else:
             _t('    error cmd LED_OFF')
 
     async def _ble_cmd_motor_left():
-        rv = await boc.cmd_motor_left()
-        print(rv, v)
+        rv = await g_bdc.cmd_motor_left()
         if rv == 0:
             _t('    OK cmd MOTOR_LEFT')
         else:
             _t('    error cmd MOTOR_LEFT')
 
     async def _ble_cmd_motor_right():
-        rv = await boc.cmd_motor_right()
+        rv = await g_bdc.cmd_motor_right()
         if rv == 0:
             _t('    OK cmd MOTOR_RIGHT')
         else:
             _t('    error cmd MOTOR_RIGHT')
 
+    async def _ble_cmd_mini_display_in():
+        rv, v = await g_bdc.cmd_display_in()
+        if rv == 0:
+            _t('    cmd DISPLAY_IN {}'.format(v))
+        else:
+            _t('    error cmd DISPLAY_IN')
+
+    async def _ble_cmd_mini_display_out():
+        rv = await g_bdc.cmd_display_out()
+        if rv == 0:
+            _t('    OK cmd DISPLAY_OUT')
+        else:
+            _t('    error cmd DISPLAY_OUT')
+
+    async def _ble_cmd_mini_wifi_in():
+        rv, v = await g_bdc.cmd_wifi_in()
+        if rv == 0:
+            _t('    cmd WIFI_IN {}'.format(v))
+        else:
+            _t('    error cmd WIFI_IN')
+
+    async def _ble_cmd_mini_wifi_out():
+        rv = await g_bdc.cmd_wifi_out()
+        if rv == 0:
+            _t('    OK cmd WIFI_OUT')
+        else:
+            _t('    error cmd WIFI_OUT')
+
+    async def _ble_cmd_leds():
+        rv = await g_bdc.cmd_leds()
+        if rv == 0:
+            _t('    OK cmd LEDS')
+        else:
+            _t('    error cmd LEDS')
+
     async def _ble_is_connected():
-        return await boc.is_connected()
+        return await g_bdc.is_connected()
 
 
 # app can run from here OR setup.py entry point 'fleak'

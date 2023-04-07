@@ -89,7 +89,7 @@ class BleOptodeMini:    # pragma: no cover
         await self._cmd('di')
         rv = await self._ans_wait()
         if rv in (b'di_on', b'di_of'):
-            return 0, rv
+            return 0, rv.decode()
         return 1, None
 
     async def cmd_display_out(self):
@@ -101,7 +101,7 @@ class BleOptodeMini:    # pragma: no cover
         await self._cmd('wi')
         rv = await self._ans_wait()
         if rv in (b'wi_on', b'wi_of'):
-            return 0, rv
+            return 0, rv.decode()
         return 1, None
 
     async def cmd_wifi_out(self):

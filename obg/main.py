@@ -7,6 +7,8 @@ import flet as ft
 import bleak
 import asyncio
 from bleak import BLEDevice, BleakError
+from flet import ButtonStyle
+
 from obg.main_elements import \
     ruc, \
     dd_devs, \
@@ -14,8 +16,7 @@ from obg.main_elements import \
     bom, boc, \
     progress_bar, \
     progress_bar_container, PORT_PROGRESS_BAR
-from obg.settings.ctx import show_mini_commands
-
+from obg.settings.ctx import show_core_commands, show_mini_commands
 
 # bdc: Bluetooth device controller, can be core or mini
 g_bdc = None
@@ -133,6 +134,7 @@ def _main(page: ft.Page):
         # m = dd_devs.value
         # m = 'F0:BC:8C:34:15:14 op_co'
         m = '4b:45:2d:e9:38:a0 op_mi_4b452de938a0'
+
         if 'op_mi' in m:
             g_bdc = bom
             g_bdc_type = 'optode device type mini'
@@ -216,7 +218,6 @@ def _main(page: ft.Page):
     # -----------------
 
     page.add(
-
         ft.Row([
             ft.Column([
                 dd_devs,
@@ -227,81 +228,74 @@ def _main(page: ft.Page):
                 lv
             ], expand=1)
         ], spacing=30, expand=8),
-
         ft.Row([
             ft.IconButton(
                 ft.icons.SEARCH,
                 on_click=click_btn_scan,
-                icon_size=50, icon_color='black',
+                icon_size=50,
+                icon_color='black',
                 tooltip='look for optode devices'),
             ft.IconButton(
                 ft.icons.BLUETOOTH_CONNECTED,
                 on_click=click_btn_connect,
-                icon_size=50, icon_color='lightblue',
+                icon_size=50,
+                icon_color='lightblue',
                 tooltip='connect to a optode device'),
             ft.IconButton(
                 ft.icons.BLUETOOTH_DISABLED,
                 on_click=click_btn_disconnect,
-                icon_size=50, icon_color='lightblue',
+                icon_size=50,
+                icon_color='lightblue',
                 tooltip='disconnect from optode device'),
             ft.IconButton(
                 ft.icons.DELETE,
                 on_click=click_btn_clear_trace,
-                icon_size=50, icon_color='grey',
+                icon_size=50,
+                icon_color='red',
                 tooltip='clear trace'),
         ], alignment=ft.MainAxisAlignment.CENTER, expand=1),
-        ft.Row([
-            ft.Text(
-                "core",
-                size=50,
-                color=ft.colors.LIGHT_GREEN_400,
-                bgcolor=None,
-                weight=ft.FontWeight.BOLD,
-            ),
-            ft.IconButton(
-                ft.icons.QUESTION_MARK,
-                on_click=click_btn_cmd_query,
-                icon_size=50,
-                icon_color='black',
-                tooltip='get status'),
-            ft.IconButton(
-                ft.icons.FLASHLIGHT_ON,
-                on_click=click_btn_cmd_led_on,
-                icon_size=50,
-                icon_color='black',
-                tooltip='led ON'),
-            ft.IconButton(
-                ft.icons.FLASHLIGHT_OFF,
-                on_click=click_btn_cmd_led_off,
-                icon_size=50,
-                icon_color='black',
-                tooltip='led OFF'),
-            ft.IconButton(
-                ft.icons.KEYBOARD_ARROW_LEFT,
-                on_click=click_btn_cmd_motor_left,
-                icon_size=50,
-                icon_color='black',
-                tooltip='motor left'),
-            ft.IconButton(
-                ft.icons.KEYBOARD_ARROW_RIGHT,
-                on_click=click_btn_cmd_motor_right,
-                icon_size=50,
-                icon_color='black',
-                tooltip='motor right'),
-            ft.IconButton(
-                ft.icons.MORE_TIME,
-                on_click=click_btn_cmd_inc_time,
-                icon_size=50,
-                icon_color='black',
-                tooltip='increase time'),
-            ft.IconButton(
-                ft.icons.PLAY_ARROW,
-                on_click=click_btn_cmd_run,
-                icon_size=50,
-                icon_color='black',
-                tooltip='run'),
-        ], alignment=ft.MainAxisAlignment.CENTER, expand=1)
     )
+
+    if show_core_commands:
+        page.add(
+            ft.Row([
+                ft.Text(
+                    "core ",
+                    size=50,
+                    color=ft.colors.BLACK,
+                    weight=ft.FontWeight.BOLD,
+                ),
+                ft.ElevatedButton(
+                    content=ft.Text(value="get status", size=20),
+                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    on_click=click_btn_cmd_query),
+                ft.ElevatedButton(
+                    content=ft.Text(value="led strip ON", size=20),
+                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    on_click=click_btn_cmd_led_on),
+                ft.ElevatedButton(
+                    content=ft.Text(value="led strip OFF", size=20),
+                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    on_click=click_btn_cmd_led_off),
+                ft.ElevatedButton(
+                    content=ft.Text(value="motor left", size=20),
+                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    on_click=click_btn_cmd_motor_left),
+                ft.ElevatedButton(
+                    content=ft.Text(value="motor right", size=20),
+                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    on_click=click_btn_cmd_motor_right),
+                # todo: do this increase interval command in firmware
+                ft.ElevatedButton(
+                    content=ft.Text(value="increase interval", size=20),
+                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    on_click=click_btn_cmd_inc_time),
+                ft.ElevatedButton(
+                    content=ft.Text(value="run", size=20),
+                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    on_click=click_btn_cmd_inc_time),
+            ], alignment=ft.MainAxisAlignment.CENTER, expand=1)
+        )
 
     if show_mini_commands:
         page.add(
@@ -309,40 +303,28 @@ def _main(page: ft.Page):
                 ft.Text(
                     "mini ",
                     size=50,
-                    color=ft.colors.LIGHT_GREEN_400,
-                    bgcolor=None,
-                    weight=ft.FontWeight.BOLD,
-                ),
-                ft.IconButton(
-                    ft.icons.DISPLAY_SETTINGS,
-                    on_click=click_btn_cmd_display_in,
-                    icon_size=50,
-                    icon_color='black',
-                    tooltip='read display input'),
-                ft.IconButton(
-                    ft.icons.ARROW_UPWARD,
-                    on_click=click_btn_cmd_display_out,
-                    icon_size=50,
-                    icon_color='black',
-                    tooltip='write display output'),
-                ft.IconButton(
-                    ft.icons.NETWORK_WIFI,
-                    on_click=click_btn_cmd_wifi_in,
-                    icon_size=50,
-                    icon_color='black',
-                    tooltip='read wifi input'),
-                ft.IconButton(
-                    ft.icons.ARROW_UPWARD,
-                    on_click=click_btn_cmd_wifi_out,
-                    icon_size=50,
-                    icon_color='black',
-                    tooltip='write wifi output'),
-                ft.IconButton(
-                    ft.icons.FLASHLIGHT_ON,
-                    on_click=click_btn_cmd_leds,
-                    icon_size=50,
-                    icon_color='black',
-                    tooltip='led dance'),
+                    color=ft.colors.BLACK,
+                    weight=ft.FontWeight.BOLD),
+                ft.ElevatedButton(
+                    content=ft.Text(value="read display", size=20),
+                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    on_click=click_btn_cmd_display_in),
+                ft.ElevatedButton(
+                    content=ft.Text(value="act display", size=20),
+                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    on_click=click_btn_cmd_display_out),
+                ft.ElevatedButton(
+                    content=ft.Text(value="read wifi", size=20),
+                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    on_click=click_btn_cmd_wifi_in),
+                ft.ElevatedButton(
+                    content=ft.Text(value="act wifi", size=20),
+                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    on_click=click_btn_cmd_wifi_out),
+                ft.ElevatedButton(
+                    content=ft.Text(value="act mini LED", size=20),
+                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    on_click=click_btn_cmd_leds),
             ], alignment=ft.MainAxisAlignment.CENTER, expand=1)
         )
 

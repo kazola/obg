@@ -128,12 +128,13 @@ def _main(page: ft.Page):
         global g_bdc
         global g_bdc_type
 
-        # todo: remove this hardcoded
-        # if not dd_devs.value:
-        #     return
-        # m = dd_devs.value
+        if not dd_devs.value:
+            return
+        m = dd_devs.value
+
+        # debug: hardcode
         # m = 'F0:BC:8C:34:15:14 op_co'
-        m = '4b:45:2d:e9:38:a0 op_mi_4b452de938a0'
+        # m = '4b:45:2d:e9:38:a0 op_mi_4b452de938a0'
 
         if 'op_mi' in m:
             g_bdc = bom

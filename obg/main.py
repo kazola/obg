@@ -7,8 +7,6 @@ import flet as ft
 import bleak
 import asyncio
 from bleak import BLEDevice, BleakError
-from flet import ButtonStyle
-
 from obg.main_elements import \
     ruc, \
     dd_devs, \
@@ -16,7 +14,8 @@ from obg.main_elements import \
     bom, boc, \
     progress_bar, \
     progress_bar_container, PORT_PROGRESS_BAR
-from obg.settings.ctx import show_core_commands, show_mini_commands
+from obg.settings.ctx import show_core_commands, show_mini_commands, mac_hardcoded_optode_mini_1, \
+    mac_hardcoded_optode_mini_2
 
 # bdc: Bluetooth device controller, can be core or mini
 g_bdc = None
@@ -128,13 +127,15 @@ def _main(page: ft.Page):
         global g_bdc
         global g_bdc_type
 
-        if not dd_devs.value:
+        if not dd_devs.value \
+                and not mac_hardcoded_optode_mini_1\
+                and not mac_hardcoded_optode_mini_2:
             return
         m = dd_devs.value
 
         # debug: hardcode
-        # m = 'F0:BC:8C:34:15:14 op_co'
-        # m = '4b:45:2d:e9:38:a0 op_mi_4b452de938a0'
+        m = '{} op_mi{}'.format(mac_hardcoded_optode_mini_1,
+                                mac_hardcoded_optode_mini_1)
 
         if 'op_mi' in m:
             g_bdc = bom
@@ -307,21 +308,21 @@ def _main(page: ft.Page):
                     color=ft.colors.BLACK,
                     weight=ft.FontWeight.BOLD),
                 ft.ElevatedButton(
-                    content=ft.Text(value="read display", size=20),
-                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
-                    on_click=click_btn_cmd_display_in),
-                ft.ElevatedButton(
                     content=ft.Text(value="act display", size=20),
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
                     on_click=click_btn_cmd_display_out),
                 ft.ElevatedButton(
-                    content=ft.Text(value="read wifi", size=20),
+                    content=ft.Text(value="read display", size=20),
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
-                    on_click=click_btn_cmd_wifi_in),
+                    on_click=click_btn_cmd_display_in),
                 ft.ElevatedButton(
                     content=ft.Text(value="act wifi", size=20),
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
                     on_click=click_btn_cmd_wifi_out),
+                ft.ElevatedButton(
+                    content=ft.Text(value="read wifi", size=20),
+                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    on_click=click_btn_cmd_wifi_in),
                 ft.ElevatedButton(
                     content=ft.Text(value="act mini LED", size=20),
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
@@ -473,6 +474,8 @@ def _main(page: ft.Page):
             _t('    error cmd LEDS')
 
     async def _ble_is_connected():
+        if not g_bdc:
+            return
         return await g_bdc.is_connected()
 
 

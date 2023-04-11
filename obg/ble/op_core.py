@@ -4,6 +4,7 @@ import time
 from bleak import BleakError, BleakClient
 import subprocess as sp
 
+from obg.ble.utils import restart_bluetooth_service
 
 g_states_core = (
     'st_booting',
@@ -55,10 +56,9 @@ class BleOptodeCore:    # pragma: no cover
         self.ans = bytes()
         self.cmd = ''
         self.dbg_ans = dbg_ans
-        # nice trick to start with fresh page
-        if platform.system() == 'Linux':
-            c = 'bluetoothctl -- disconnect'
-            sp.run(c, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+
+        # nice trick to start fresh
+        restart_bluetooth_service()
 
     async def is_connected(self):
         return self.cli and self.cli.is_connected

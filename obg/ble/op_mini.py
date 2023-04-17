@@ -6,6 +6,8 @@ import subprocess as sp
 
 
 # these are defined OK
+from obg.ble.utils import restart_bluetooth_service
+
 UUID_T = '00002324-0000-1000-8000-00805f9b34fb'
 UUID_R = '00002325-0000-1000-8000-00805f9b34fb'
 
@@ -38,10 +40,8 @@ class BleOptodeMini:    # pragma: no cover
         self.ans = bytes()
         self.cmd = ''
         self.dbg_ans = dbg_ans
-        # nice trick to start with fresh page
-        if platform.system() == 'Linux':
-            c = 'bluetoothctl -- disconnect'
-            sp.run(c, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+        # nice trick to start fresh
+        restart_bluetooth_service()
 
     async def is_connected(self):
         return self.cli and self.cli.is_connected

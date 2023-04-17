@@ -7,6 +7,8 @@ import flet as ft
 import bleak
 import asyncio
 from bleak import BLEDevice, BleakError
+
+from obg.ble.utils import restart_bluetooth_service
 from obg.main_elements import \
     ruc, \
     dd_devs, \
@@ -380,9 +382,6 @@ def _main(page: ft.Page):
     async def _ble_disconnect():
         await g_bdc.disconnect()
         _t('disconnected')
-        if platform.system() == 'Linux':
-            c = 'bluetoothctl -- disconnect'
-            sp.run(c, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
 
     async def _ble_cmd_run():
         rv = await g_bdc.cmd_run()
@@ -495,8 +494,11 @@ def _main(page: ft.Page):
         return await g_bdc.is_connected()
 
 
-# app can run from here OR setup.py entry point 'fleak'
+# app can run from here OR setup.py entry point
 def main():
+
+    restart_bluetooth_service()
+
     # ft.app(target=_main)
     ft.app(target=_main, view=ft.WEB_BROWSER)
 

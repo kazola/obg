@@ -1,7 +1,7 @@
 import flet as ft
 import asyncio
-from obg.settings.ble.op_core import BleOptodeCore
-from obg.settings.ble.op_mini import BleOptodeMini
+from obg.ble.op_core import BleOptodeCore
+from obg.ble.op_mini import BleOptodeMini
 
 
 PORT_PROGRESS_BAR = 56142

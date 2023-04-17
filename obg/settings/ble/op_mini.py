@@ -28,6 +28,8 @@ def _is_cmd_done(c, a):
         return True
     if c == 'wo' and a == 'wo_ok':
         return True
+    if c == 'wh' and a == 'wh_ok':
+        return True
 
 
 class BleOptodeMini:    # pragma: no cover
@@ -96,6 +98,11 @@ class BleOptodeMini:    # pragma: no cover
         await self._cmd('do')
         rv = await self._ans_wait()
         return 0 if rv == b'do_ok' else 1
+
+    async def cmd_display_wh(self):
+        await self._cmd('wh')
+        rv = await self._ans_wait()
+        return 0 if rv == b'wh_ok' else 1
 
     async def cmd_wifi_in(self):
         await self._cmd('wi')

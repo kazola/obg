@@ -201,6 +201,11 @@ def _main(page: ft.Page):
         ruc(_ble_cmd_mini_display_out())
 
     @_on_click_ensure_connected
+    def click_btn_cmd_display_wheel(_):
+        _t('sending cmd DISPLAY_WH')
+        ruc(_ble_cmd_mini_display_wh())
+
+    @_on_click_ensure_connected
     def click_btn_cmd_wifi_in(_):
         _t('sending cmd WIFI_IN')
         ruc(_ble_cmd_mini_wifi_in())
@@ -315,6 +320,10 @@ def _main(page: ft.Page):
                     content=ft.Text(value="read display", size=20),
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
                     on_click=click_btn_cmd_display_in),
+                ft.ElevatedButton(
+                    content=ft.Text(value="act wheel", size=20),
+                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    on_click=click_btn_cmd_display_wheel),
                 ft.ElevatedButton(
                     content=ft.Text(value="act wifi", size=20),
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
@@ -451,6 +460,13 @@ def _main(page: ft.Page):
             _t('    OK cmd DISPLAY_OUT')
         else:
             _t('    error cmd DISPLAY_OUT')
+
+    async def _ble_cmd_mini_display_wh():
+        rv = await g_bdc.cmd_display_wh()
+        if rv == 0:
+            _t('    OK cmd DISPLAY_WH')
+        else:
+            _t('    error cmd DISPLAY_WH')
 
     async def _ble_cmd_mini_wifi_in():
         rv, v = await g_bdc.cmd_wifi_in()

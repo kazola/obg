@@ -43,6 +43,10 @@ def _is_cmd_done(c, a):
         rv = True
     if c == 'ba' and int(a):
         rv = True
+    if c == 'll' and len(a) == 4:
+        rv = True
+    if c == 'lr' and len(a) == 4:
+        rv = True
 
     # debug
     # if rv:
@@ -56,9 +60,6 @@ class BleOptodeCore:    # pragma: no cover
         self.ans = bytes()
         self.cmd = ''
         self.dbg_ans = dbg_ans
-
-        # nice trick to start fresh
-        # restart_bluetooth_service()
 
     async def is_connected(self):
         return self.cli and self.cli.is_connected
@@ -118,6 +119,20 @@ class BleOptodeCore:    # pragma: no cover
         await self._cmd('st')
         rv = await self._ans_wait()
         if rv and rv.decode() in g_states_core:
+            return 0, rv.decode()
+        return 1, ''
+
+    async def cmd_limit_left(self):
+        await self._cmd('ll')
+        rv = await self._ans_wait()
+        if len(rv) == 4 and b'll' in rv:
+            return 0, rv.decode()
+        return 1, ''
+
+    async def cmd_limit_right(self):
+        await self._cmd('lr')
+        rv = await self._ans_wait()
+        if len(rv) == 4 and b'lr' in rv:
             return 0, rv.decode()
         return 1, ''
 

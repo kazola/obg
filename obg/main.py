@@ -16,8 +16,10 @@ from obg.main_elements import \
     bom, boc, \
     progress_bar, \
     progress_bar_container, PORT_PROGRESS_BAR
-from obg.settings.ctx import show_core_commands, show_mini_commands, mac_hardcoded_optode_mini_1, \
-    mac_hardcoded_optode_mini_2
+from obg.settings.ctx import show_core_commands, show_mini_commands, \
+    mac_hardcoded_optode_mini_1, \
+    mac_hardcoded_optode_mini_2, mac_hardcoded_optode_core_0
+
 
 # bdc: Bluetooth device controller, can be core or mini
 g_bdc = None
@@ -131,13 +133,18 @@ def _main(page: ft.Page):
 
         if not dd_devs.value \
                 and not mac_hardcoded_optode_mini_1\
-                and not mac_hardcoded_optode_mini_2:
+                and not mac_hardcoded_optode_mini_2\
+                and not mac_hardcoded_optode_core_0:
             return
         m = dd_devs.value
 
-        # debug: hardcode
-        m = '{} op_mi{}'.format(mac_hardcoded_optode_mini_1,
-                                mac_hardcoded_optode_mini_1)
+        # debug: mac CORE hardcode
+        m = '{} op_co{}'.format(mac_hardcoded_optode_core_0,
+                                mac_hardcoded_optode_core_0)
+
+        # debug: mac MINI hardcode
+        # m = '{} op_mi{}'.format(mac_hardcoded_optode_mini_1,
+        #                         mac_hardcoded_optode_mini_1)
 
         if 'op_mi' in m:
             g_bdc = bom
@@ -191,6 +198,16 @@ def _main(page: ft.Page):
     def click_btn_cmd_motor_right(_):
         _t('sending cmd MOTOR_RIGHT')
         ruc(_ble_cmd_motor_right())
+
+    @_on_click_ensure_connected
+    def click_btn_cmd_limit_left(_):
+        _t('sending cmd LIMIT_LEFT')
+        ruc(_ble_cmd_limit_left())
+
+    @_on_click_ensure_connected
+    def click_btn_cmd_limit_right(_):
+        _t('sending cmd LIMIT_RIGHT')
+        ruc(_ble_cmd_limit_right())
 
     @_on_click_ensure_connected
     def click_btn_cmd_display_in(_):
@@ -294,11 +311,19 @@ def _main(page: ft.Page):
                     content=ft.Text(value="motor right", size=20),
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
                     on_click=click_btn_cmd_motor_right),
-                # todo: do this increase interval command in firmware
                 ft.ElevatedButton(
-                    content=ft.Text(value="increase interval", size=20),
+                    content=ft.Text(value="limit left", size=20),
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
-                    on_click=click_btn_cmd_inc_time),
+                    on_click=click_btn_cmd_limit_left),
+                ft.ElevatedButton(
+                    content=ft.Text(value="limit right", size=20),
+                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    on_click=click_btn_cmd_limit_right),
+                # # todo: do this increase interval command in firmware
+                # ft.ElevatedButton(
+                #     content=ft.Text(value="increase interval", size=20),
+                #     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                #     on_click=click_btn_cmd_inc_time),
                 ft.ElevatedButton(
                     content=ft.Text(value="run", size=20),
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
@@ -445,6 +470,20 @@ def _main(page: ft.Page):
             _t('    OK cmd MOTOR_RIGHT')
         else:
             _t('    error cmd MOTOR_RIGHT')
+
+    async def _ble_cmd_limit_left():
+        rv, v = await g_bdc.cmd_limit_left()
+        if rv == 0:
+            _t('    OK cmd LIMIT_LEFT is {}'.format(v))
+        else:
+            _t('    error cmd LIMIT_LEFT')
+
+    async def _ble_cmd_limit_right():
+        rv, v = await g_bdc.cmd_limit_right()
+        if rv == 0:
+            _t(' OK cmd LIMIT_RIGHT is {}'.format(v))
+        else:
+            _t('    error cmd LIMIT_RIGHT')
 
     async def _ble_cmd_mini_display_in():
         rv, v = await g_bdc.cmd_display_in()

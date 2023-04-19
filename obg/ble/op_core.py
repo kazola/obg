@@ -58,7 +58,7 @@ class BleOptodeCore:    # pragma: no cover
         self.dbg_ans = dbg_ans
 
         # nice trick to start fresh
-        restart_bluetooth_service()
+        # restart_bluetooth_service()
 
     async def is_connected(self):
         return self.cli and self.cli.is_connected

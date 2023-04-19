@@ -1,5 +1,5 @@
 mac_hardcoded_optode_core = ''
-mac_hardcoded_optode_mini_1 = 'FE:7D:29:D8:7D:67'
+mac_hardcoded_optode_mini_1 = '2f:b3:cf:49:55:4d'
 mac_hardcoded_optode_mini_2 = '11:22:33:44:55:66'
 
 

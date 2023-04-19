@@ -41,7 +41,7 @@ class BleOptodeMini:    # pragma: no cover
         self.cmd = ''
         self.dbg_ans = dbg_ans
         # nice trick to start fresh
-        restart_bluetooth_service()
+        # restart_bluetooth_service()
 
     async def is_connected(self):
         return self.cli and self.cli.is_connected
@@ -54,7 +54,12 @@ class BleOptodeMini:    # pragma: no cover
         if self.dbg_ans:
             print('<-', c)
 
-        await self.cli.write_gatt_char(UUID_R, c.encode())
+        # todo > careful with this
+        if platform.system() == "Linux":
+            await self.cli.write_gatt_char(UUID_R, c.encode())
+        elif platform.system() == "Windows":
+            print('hello')
+            await self.cli.write_gatt_char(UUID_R, c.encode(), response=True)
 
     async def _ans_wait(self, timeout=10.0):
 

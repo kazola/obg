@@ -291,10 +291,10 @@ def _main(page: ft.Page):
                     color=ft.colors.BLACK,
                     weight=ft.FontWeight.BOLD,
                 ),
-                ft.ElevatedButton(
-                    content=ft.Text(value="get status", size=20),
-                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
-                    on_click=click_btn_cmd_query),
+                # ft.ElevatedButton(
+                #     content=ft.Text(value="get status", size=20),
+                #     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                #     on_click=click_btn_cmd_query),
                 ft.ElevatedButton(
                     content=ft.Text(value="led strip ON", size=20),
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
@@ -327,7 +327,7 @@ def _main(page: ft.Page):
                 ft.ElevatedButton(
                     content=ft.Text(value="run", size=20),
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
-                    on_click=click_btn_cmd_inc_time),
+                    on_click=click_btn_cmd_run),
             ], alignment=ft.MainAxisAlignment.CENTER, expand=1)
         )
 
@@ -538,8 +538,8 @@ def main():
 
     restart_bluetooth_service()
 
-    # ft.app(target=_main)
-    ft.app(target=_main, view=ft.WEB_BROWSER)
+    ft.app(target=_main)
+    # ft.app(target=_main, view=ft.WEB_BROWSER)
 
 
 if __name__ == '__main__':

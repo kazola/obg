@@ -17,9 +17,8 @@ from obg.main_elements import \
     progress_bar, \
     progress_bar_container, PORT_PROGRESS_BAR
 from obg.settings.ctx import show_core_commands, show_mini_commands, \
-    mac_hardcoded_optode_mini_1, \
-    mac_hardcoded_optode_mini_2, mac_hardcoded_optode_core_0
-
+    mac_hc_mi_1, \
+    mac_hc_mi_2, mac_hc_co_0, chosen_mac_hc
 
 # bdc: Bluetooth device controller, can be core or mini
 g_bdc = None
@@ -131,20 +130,13 @@ def _main(page: ft.Page):
         global g_bdc
         global g_bdc_type
 
-        if not dd_devs.value \
-                and not mac_hardcoded_optode_mini_1\
-                and not mac_hardcoded_optode_mini_2\
-                and not mac_hardcoded_optode_core_0:
+        if not dd_devs.value and not chosen_mac_hc:
             return
+
+        # priority: first hardcoded, second dropdown
         m = dd_devs.value
-
-        # debug: mac CORE hardcode
-        m = '{} op_co{}'.format(mac_hardcoded_optode_core_0,
-                                mac_hardcoded_optode_core_0)
-
-        # debug: mac MINI hardcode
-        # m = '{} op_mi{}'.format(mac_hardcoded_optode_mini_1,
-        #                         mac_hardcoded_optode_mini_1)
+        if chosen_mac_hc:
+            m = chosen_mac_hc
 
         if 'op_mi' in m:
             g_bdc = bom
@@ -376,6 +368,10 @@ def _main(page: ft.Page):
         def _scan_cb(d: BLEDevice, _):
             if d.address in _det:
                 return
+            if not d.name:
+                return
+
+            # grabs both "op_co" and "op_mi"
             if not d.name.startswith('op_'):
                 return
 

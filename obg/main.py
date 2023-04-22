@@ -127,6 +127,11 @@ def _main(page: ft.Page):
         ruc(_ble_scan())
 
     def click_btn_connect(_):
+
+        if ruc(_ble_is_connected()):
+            _t('BLE is already connected')
+            return
+
         global g_bdc
         global g_bdc_type
 
@@ -534,8 +539,8 @@ def main():
 
     restart_bluetooth_service()
 
-    ft.app(target=_main)
-    # ft.app(target=_main, view=ft.WEB_BROWSER)
+    #ft.app(target=_main)
+    ft.app(target=_main, view=ft.WEB_BROWSER)
 
 
 if __name__ == '__main__':

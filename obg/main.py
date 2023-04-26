@@ -586,8 +586,8 @@ def _main(page: ft.Page):
 def main():
 
     restart_bluetooth_service()
-    # ft.app(target=_main)
-    ft.app(target=_main, view=ft.WEB_BROWSER)
+    ft.app(target=_main)
+    # ft.app(target=_main, view=ft.WEB_BROWSER)
 
 
 if __name__ == '__main__':

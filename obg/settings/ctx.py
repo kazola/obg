@@ -11,4 +11,4 @@ chosen_mac_hc = ''
 
 
 show_core_commands = True
-show_mini_commands = True
+show_mini_commands = False

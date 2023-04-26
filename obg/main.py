@@ -163,7 +163,6 @@ def _main(page: ft.Page):
         ruc(_ble_connect(m))
 
     @_on_click_ensure_connected
-    @_on_click_ensure_core
     def click_btn_disconnect(_):
         ruc(_ble_disconnect())
 
@@ -356,10 +355,10 @@ def _main(page: ft.Page):
                     content=ft.Text(value="run", size=20),
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
                     on_click=click_btn_cmd_run),
-                ft.ElevatedButton(
-                    content=ft.Text(value="download", size=20),
-                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
-                    on_click=click_btn_cmd_dl),
+                # ft.ElevatedButton(
+                #     content=ft.Text(value="download", size=20),
+                #     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                #     on_click=click_btn_cmd_dl),
             ], alignment=ft.MainAxisAlignment.CENTER, expand=1)
         )
 
@@ -411,10 +410,11 @@ def _main(page: ft.Page):
             if not d.name:
                 return
 
-            # grabs both "op_co" and "op_mi"
-            if not d.name.startswith('op_'):
+            # grabs either "op_co" or "op_mi", or "op_" for both
+            if not d.name.startswith('op_co_'):
                 return
 
+            _t('found {} -> {}'.format(d.name, d.address))
             _det.append(d.address)
             s = d.address + '   ' + d.name
             dd_devs.options.append(ft.dropdown.Option(s))

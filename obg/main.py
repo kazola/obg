@@ -1,13 +1,10 @@
 import os
-import subprocess as sp
-import platform
 import socket
 import threading
 import flet as ft
 import bleak
 import asyncio
 from bleak import BLEDevice, BleakError
-
 from obg.ble.utils import restart_bluetooth_service
 from obg.main_elements import \
     ruc, \
@@ -17,12 +14,11 @@ from obg.main_elements import \
     progress_bar, \
     progress_bar_container, PORT_PROGRESS_BAR
 from obg.settings.ctx import show_core_commands, show_mini_commands, \
-    mac_hc_mi_1, \
-    mac_hc_mi_2, mac_hc_co_0, chosen_mac_hc
+    chosen_mac_hc
 
 # bdc: Bluetooth device controller, can be core or mini
-g_bdc = None
 g_bdc_type = ''
+g_scanning = False
 
 
 def _main(page: ft.Page):
@@ -120,20 +116,38 @@ def _main(page: ft.Page):
             func(*args)
         return wrapper
 
+    def _on_click_ensure_mini(func):
+        def wrapper(*args):
+            if not g_bdc_type == 'op_mi':
+                return
+            func(*args)
+        return wrapper
+
+    def _on_click_ensure_core(func):
+        def wrapper(*args):
+            if not g_bdc_type == 'op_co':
+                return
+            func(*args)
+        return wrapper
+
     def click_btn_scan(_):
         dd_devs.value = ''
         dd_devs.options = []
         page.update()
+        global g_scanning
+        g_scanning = True
         ruc(_ble_scan())
+        g_scanning = False
 
     def click_btn_connect(_):
+
+        if g_scanning:
+            _t('BLE is currently scanning')
+            return
 
         if ruc(_ble_is_connected()):
             _t('BLE is already connected')
             return
-
-        global g_bdc
-        global g_bdc_type
 
         if not dd_devs.value and not chosen_mac_hc:
             return
@@ -143,31 +157,36 @@ def _main(page: ft.Page):
         if chosen_mac_hc:
             m = chosen_mac_hc
 
-        if 'op_mi' in m:
-            g_bdc = bom
-            g_bdc_type = 'optode device type mini'
-        else:
-            g_bdc = boc
-            g_bdc_type = 'optode device type core'
+        global g_bdc_type
+        g_bdc_type = 'op_mi' if 'op_mi' in m else 'op_co'
         m = m.split(' ')[0]
-        _t('connecting to mac {} chosen from dropdown'.format(m))
         ruc(_ble_connect(m))
 
     @_on_click_ensure_connected
+    @_on_click_ensure_core
     def click_btn_disconnect(_):
         ruc(_ble_disconnect())
 
     @_on_click_ensure_connected
+    @_on_click_ensure_core
     def click_btn_cmd_run(_):
         _t('sending cmd RUN')
         ruc(_ble_cmd_run())
 
     @_on_click_ensure_connected
+    @_on_click_ensure_core
+    def click_btn_cmd_dl(_):
+        _t('sending cmd DL')
+        ruc(_ble_cmd_dl())
+
+    @_on_click_ensure_connected
+    @_on_click_ensure_core
     def click_btn_cmd_inc_time(_):
         _t('sending cmd INC_TIME')
         ruc(_ble_cmd_inc_time())
 
     @_on_click_ensure_connected
+    @_on_click_ensure_core
     def click_btn_cmd_query(_):
         _t('sending cmd STATUS')
         ruc(_ble_cmd_status())
@@ -177,62 +196,74 @@ def _main(page: ft.Page):
         ruc(_ble_cmd_battery())
 
     @_on_click_ensure_connected
+    @_on_click_ensure_core
     def click_btn_cmd_led_on(_):
         _t('sending cmd LED_ON')
         ruc(_ble_cmd_led_on())
 
     @_on_click_ensure_connected
+    @_on_click_ensure_core
     def click_btn_cmd_led_off(_):
         _t('sending cmd LED_OFF')
         ruc(_ble_cmd_led_off())
 
     @_on_click_ensure_connected
+    @_on_click_ensure_core
     def click_btn_cmd_motor_left(_):
         _t('sending cmd MOTOR_LEFT')
         ruc(_ble_cmd_motor_left())
 
     @_on_click_ensure_connected
+    @_on_click_ensure_core
     def click_btn_cmd_motor_right(_):
         _t('sending cmd MOTOR_RIGHT')
         ruc(_ble_cmd_motor_right())
 
     @_on_click_ensure_connected
+    @_on_click_ensure_core
     def click_btn_cmd_limit_left(_):
         _t('sending cmd LIMIT_LEFT')
         ruc(_ble_cmd_limit_left())
 
     @_on_click_ensure_connected
+    @_on_click_ensure_core
     def click_btn_cmd_limit_right(_):
         _t('sending cmd LIMIT_RIGHT')
         ruc(_ble_cmd_limit_right())
 
     @_on_click_ensure_connected
-    def click_btn_cmd_display_in(_):
+    @_on_click_ensure_mini
+    def click_btn_cmd_mini_display_in(_):
         _t('sending cmd DISPLAY_IN')
         ruc(_ble_cmd_mini_display_in())
 
     @_on_click_ensure_connected
-    def click_btn_cmd_display_out(_):
+    @_on_click_ensure_mini
+    def click_btn_cmd_mini_display_out(_):
         _t('sending cmd DISPLAY_OUT')
         ruc(_ble_cmd_mini_display_out())
 
     @_on_click_ensure_connected
-    def click_btn_cmd_display_wheel(_):
+    @_on_click_ensure_mini
+    def click_btn_cmd_mini_display_wheel(_):
         _t('sending cmd DISPLAY_WH')
         ruc(_ble_cmd_mini_display_wh())
 
     @_on_click_ensure_connected
-    def click_btn_cmd_wifi_in(_):
+    @_on_click_ensure_mini
+    def click_btn_cmd_mini_wifi_in(_):
         _t('sending cmd WIFI_IN')
         ruc(_ble_cmd_mini_wifi_in())
 
     @_on_click_ensure_connected
-    def click_btn_cmd_wifi_out(_):
+    @_on_click_ensure_mini
+    def click_btn_cmd_mini_wifi_out(_):
         _t('sending cmd WIFI_OUT')
         ruc(_ble_cmd_mini_wifi_out())
 
     @_on_click_ensure_connected
-    def click_btn_cmd_leds(_):
+    @_on_click_ensure_mini
+    def click_btn_cmd_mini_leds(_):
         _t('sending cmd LEDS')
         ruc(_ble_cmd_leds())
 
@@ -325,6 +356,10 @@ def _main(page: ft.Page):
                     content=ft.Text(value="run", size=20),
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
                     on_click=click_btn_cmd_run),
+                ft.ElevatedButton(
+                    content=ft.Text(value="download", size=20),
+                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    on_click=click_btn_cmd_dl),
             ], alignment=ft.MainAxisAlignment.CENTER, expand=1)
         )
 
@@ -339,27 +374,27 @@ def _main(page: ft.Page):
                 ft.ElevatedButton(
                     content=ft.Text(value="act display", size=20),
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
-                    on_click=click_btn_cmd_display_out),
+                    on_click=click_btn_cmd_mini_display_out),
                 ft.ElevatedButton(
                     content=ft.Text(value="read display", size=20),
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
-                    on_click=click_btn_cmd_display_in),
+                    on_click=click_btn_cmd_mini_display_in),
                 ft.ElevatedButton(
                     content=ft.Text(value="act wheel", size=20),
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
-                    on_click=click_btn_cmd_display_wheel),
+                    on_click=click_btn_cmd_mini_display_wheel),
                 ft.ElevatedButton(
                     content=ft.Text(value="act wifi", size=20),
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
-                    on_click=click_btn_cmd_wifi_out),
+                    on_click=click_btn_cmd_mini_wifi_out),
                 ft.ElevatedButton(
                     content=ft.Text(value="read wifi", size=20),
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
-                    on_click=click_btn_cmd_wifi_in),
+                    on_click=click_btn_cmd_mini_wifi_in),
                 ft.ElevatedButton(
                     content=ft.Text(value="act mini LED", size=20),
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
-                    on_click=click_btn_cmd_leds),
+                    on_click=click_btn_cmd_mini_leds),
             ], alignment=ft.MainAxisAlignment.CENTER, expand=1)
         )
 
@@ -399,147 +434,159 @@ def _main(page: ft.Page):
 
     async def _ble_connect(mac):
         _t('connecting to {}'.format(mac))
-        rv = await g_bdc.connect(mac)
+        if g_bdc_type == 'op_mi':
+            rv = await bom.connect(mac)
+        else:
+            rv = await boc.connect(mac)
         if rv == 0:
             _t('    connected to {}'.format(g_bdc_type))
         else:
             _t('    error connecting')
 
     async def _ble_disconnect():
-        await g_bdc.disconnect()
+        if g_bdc_type == 'op_mi':
+            await bom.disconnect()
+        else:
+            await boc.disconnect()
         _t('disconnected')
 
     async def _ble_cmd_run():
-        rv = await g_bdc.cmd_run()
+        rv = await boc.cmd_run()
         if rv == 0:
             _t('    OK cmd RUN')
         else:
             _t('    error cmd RUN')
 
+    async def _ble_cmd_dl():
+        rv = await boc.cmd_dl()
+        if rv == 0:
+            _t('    OK cmd DL')
+        else:
+            _t('    error cmd DL')
+
     async def _ble_cmd_inc_time():
-        rv = await g_bdc.cmd_inc_time()
+        rv = await boc.cmd_inc_time()
         if rv == 0:
             _t('    OK cmd INC_TIME')
         else:
             _t('    error cmd INC_TIME')
 
     async def _ble_cmd_status():
-        rv, v = await g_bdc.cmd_status()
+        rv, v = await boc.cmd_status()
         if rv == 0:
             _t('    OK cmd STATUS {}'.format(v))
         else:
             _t('    error cmd STATUS')
 
     async def _ble_cmd_macs():
-        rv, v = await g_bdc.cmd_macs()
+        rv, v = await boc.cmd_macs()
         if rv == 0:
             _t('    OK cmd MAC {}'.format(v))
         else:
             _t('    error cmd MAC')
 
     async def _ble_cmd_battery():
-        rv, v = await g_bdc.cmd_battery()
+        rv, v = await boc.cmd_battery()
         if rv == 0:
             _t('    OK cmd BATTERY {}'.format(v))
         else:
             _t('    error cmd BATTERY')
 
     async def _ble_cmd_led_on():
-        rv = await g_bdc.cmd_led_on()
+        rv = await boc.cmd_led_on()
         if rv == 0:
             _t('    OK cmd LED_ON')
         else:
             _t('    error cmd LED_ON')
 
     async def _ble_cmd_led_off():
-        rv = await g_bdc.cmd_led_off()
+        rv = await boc.cmd_led_off()
         if rv == 0:
             _t('    OK cmd LED_OFF')
         else:
             _t('    error cmd LED_OFF')
 
     async def _ble_cmd_motor_left():
-        rv = await g_bdc.cmd_motor_left()
+        rv = await boc.cmd_motor_left()
         if rv == 0:
             _t('    OK cmd MOTOR_LEFT')
         else:
             _t('    error cmd MOTOR_LEFT')
 
     async def _ble_cmd_motor_right():
-        rv = await g_bdc.cmd_motor_right()
+        rv = await boc.cmd_motor_right()
         if rv == 0:
             _t('    OK cmd MOTOR_RIGHT')
         else:
             _t('    error cmd MOTOR_RIGHT')
 
     async def _ble_cmd_limit_left():
-        rv, v = await g_bdc.cmd_limit_left()
+        rv, v = await boc.cmd_limit_left()
         if rv == 0:
             _t('    OK cmd LIMIT_LEFT is {}'.format(v))
         else:
             _t('    error cmd LIMIT_LEFT')
 
     async def _ble_cmd_limit_right():
-        rv, v = await g_bdc.cmd_limit_right()
+        rv, v = await boc.cmd_limit_right()
         if rv == 0:
             _t(' OK cmd LIMIT_RIGHT is {}'.format(v))
         else:
             _t('    error cmd LIMIT_RIGHT')
 
     async def _ble_cmd_mini_display_in():
-        rv, v = await g_bdc.cmd_display_in()
+        rv, v = await bom.cmd_display_in()
         if rv == 0:
             _t('    cmd DISPLAY_IN {}'.format(v))
         else:
             _t('    error cmd DISPLAY_IN')
 
     async def _ble_cmd_mini_display_out():
-        rv = await g_bdc.cmd_display_out()
+        rv = await bom.cmd_display_out()
         if rv == 0:
             _t('    OK cmd DISPLAY_OUT')
         else:
             _t('    error cmd DISPLAY_OUT')
 
     async def _ble_cmd_mini_display_wh():
-        rv = await g_bdc.cmd_display_wh()
+        rv = await bom.cmd_display_wh()
         if rv == 0:
             _t('    OK cmd DISPLAY_WH')
         else:
             _t('    error cmd DISPLAY_WH')
 
     async def _ble_cmd_mini_wifi_in():
-        rv, v = await g_bdc.cmd_wifi_in()
+        rv, v = await bom.cmd_wifi_in()
         if rv == 0:
             _t('    cmd WIFI_IN {}'.format(v))
         else:
             _t('    error cmd WIFI_IN')
 
     async def _ble_cmd_mini_wifi_out():
-        rv = await g_bdc.cmd_wifi_out()
+        rv = await bom.cmd_wifi_out()
         if rv == 0:
             _t('    OK cmd WIFI_OUT')
         else:
             _t('    error cmd WIFI_OUT')
 
     async def _ble_cmd_leds():
-        rv = await g_bdc.cmd_leds()
+        rv = await bom.cmd_leds()
         if rv == 0:
             _t('    OK cmd LEDS')
         else:
             _t('    error cmd LEDS')
 
     async def _ble_is_connected():
-        if not g_bdc:
-            return
-        return await g_bdc.is_connected()
+        if g_bdc_type == 'op_mi':
+            return await bom.is_connected()
+        return await boc.is_connected()
 
 
 # app can run from here OR setup.py entry point
 def main():
 
     restart_bluetooth_service()
-
-    #ft.app(target=_main)
+    # ft.app(target=_main)
     ft.app(target=_main, view=ft.WEB_BROWSER)
 
 

@@ -24,7 +24,12 @@ def _is_cmd_done(c, a):
     if type(a) is bytes:
         a = a.decode()
 
+    if a == 'ERR':
+        return True
+
     if c == 'ru' and a == 'run_ok':
+        rv = True
+    if c == 'dl' and a == 'dl_ok':
         rv = True
     # increase time
     if c == 'it' and a == 'inc_time_ok':
@@ -109,6 +114,11 @@ class BleOptodeCore:    # pragma: no cover
         await self._cmd('ru')
         rv = await self._ans_wait()
         return 0 if rv == b'run_ok' else 1
+
+    async def cmd_dl(self):
+        await self._cmd('dl')
+        rv = await self._ans_wait()
+        return 0 if rv == b'dl_ok' else 1
 
     async def cmd_inc_time(self):
         await self._cmd('it')

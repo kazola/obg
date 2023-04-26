@@ -10,5 +10,5 @@ chosen_mac_hc = ''
 # chosen_mac_hc = '{} op_mi{}'.format(mac_hc_mi_1, mac_hc_mi_1)
 
 
-show_core_commands = False
+show_core_commands = True
 show_mini_commands = True

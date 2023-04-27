@@ -230,6 +230,10 @@ def _main(page: ft.Page):
         _t('sending cmd LIMIT_RIGHT')
         ruc(_ble_cmd_limit_right())
 
+    # ------------------------
+    # mini click buttons
+    # ------------------------
+
     @_on_click_ensure_connected
     @_on_click_ensure_mini
     def click_btn_cmd_mini_display_in(_):
@@ -355,7 +359,7 @@ def _main(page: ft.Page):
                     tooltip='test motor limit right',
                     color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
                     on_click=click_btn_cmd_limit_right),
-                # # todo: do this increase interval command in firmware
+                # todo: do this increase interval command in firmware
                 # ft.ElevatedButton(
                 #     content=ft.Text(value="increase interval", size=20),
                 #     color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,

@@ -23,6 +23,9 @@ g_scanning = False
 
 def _main(page: ft.Page):
 
+    # aesthetics for window for desktop application
+    page.window_maximized = True
+
     def _th_fxn_progress_bar_display():
         _sk = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         _sk.settimeout(.5)
@@ -359,11 +362,11 @@ def _main(page: ft.Page):
                     tooltip='test motor limit right',
                     color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
                     on_click=click_btn_cmd_limit_right),
-                # todo: do this increase interval command in firmware
-                # ft.ElevatedButton(
-                #     content=ft.Text(value="increase interval", size=20),
-                #     color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
-                #     on_click=click_btn_cmd_inc_time),
+                ft.ElevatedButton(
+                    content=ft.Text(value="interval", size=20),
+                    tooltip='adjust time between scans',
+                    color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
+                    on_click=click_btn_cmd_inc_time),
                 ft.ElevatedButton(
                     content=ft.Text(value="run", size=20),
                     tooltip='go to run mode',
@@ -480,9 +483,9 @@ def _main(page: ft.Page):
             _t('    error cmd DL')
 
     async def _ble_cmd_inc_time():
-        rv = await boc.cmd_inc_time()
+        rv, v = await boc.cmd_inc_time()
         if rv == 0:
-            _t('    OK cmd INC_TIME')
+            _t('    OK cmd INC_TIME {}'.format(v))
         else:
             _t('    error cmd INC_TIME')
 

@@ -32,7 +32,7 @@ def _is_cmd_done(c, a):
     if c == 'dl' and a == 'dl_ok':
         rv = True
     # increase time
-    if c == 'it' and a == 'inc_time_ok':
+    if c == 'it' and a in ('5m', '15m', '30m'):
         rv = True
     if c == 'ma' and len(a) == 17:
         rv = True
@@ -123,7 +123,10 @@ class BleOptodeCore:    # pragma: no cover
     async def cmd_inc_time(self):
         await self._cmd('it')
         rv = await self._ans_wait()
-        return 0 if rv == b'inc_time_ok' else 1
+        valid_times = (b'5m', b'15m', b'30m')
+        if rv in valid_times:
+            return 0, rv.decode()
+        return 1, ''
 
     async def cmd_status(self):
         await self._cmd('st')

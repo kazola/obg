@@ -320,30 +320,37 @@ def _main(page: ft.Page):
                 ),
                 ft.ElevatedButton(
                     content=ft.Text(value="get status", size=20),
+                    tooltip='get core info',
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
                     on_click=click_btn_cmd_query),
                 ft.ElevatedButton(
                     content=ft.Text(value="led strip ON", size=20),
+                    tooltip='turn LED strip ON',
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
                     on_click=click_btn_cmd_led_on),
                 ft.ElevatedButton(
                     content=ft.Text(value="led strip OFF", size=20),
+                    tooltip='turn LED strip OFF',
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
                     on_click=click_btn_cmd_led_off),
                 ft.ElevatedButton(
                     content=ft.Text(value="motor left", size=20),
+                    tooltip='move motor left',
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
                     on_click=click_btn_cmd_motor_left),
                 ft.ElevatedButton(
                     content=ft.Text(value="motor right", size=20),
+                    tooltip='move motor right',
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
                     on_click=click_btn_cmd_motor_right),
                 ft.ElevatedButton(
                     content=ft.Text(value="limit left", size=20),
+                    tooltip='test motor limit left',
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
                     on_click=click_btn_cmd_limit_left),
                 ft.ElevatedButton(
                     content=ft.Text(value="limit right", size=20),
+                    tooltip='test motor limit right',
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
                     on_click=click_btn_cmd_limit_right),
                 # # todo: do this increase interval command in firmware
@@ -353,10 +360,12 @@ def _main(page: ft.Page):
                 #     on_click=click_btn_cmd_inc_time),
                 ft.ElevatedButton(
                     content=ft.Text(value="run", size=20),
+                    tooltip='go to run mode',
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
                     on_click=click_btn_cmd_run),
                 # ft.ElevatedButton(
                 #     content=ft.Text(value="download", size=20),
+                #     tooltip = 'go to download mode',
                 #     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
                 #     on_click=click_btn_cmd_dl),
             ], alignment=ft.MainAxisAlignment.CENTER, expand=1)

@@ -351,7 +351,7 @@ def _main(page: ft.Page):
                 ft.ElevatedButton(
                     content=ft.Text(value="limit right", size=20),
                     tooltip='test motor limit right',
-                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
                     on_click=click_btn_cmd_limit_right),
                 # # todo: do this increase interval command in firmware
                 # ft.ElevatedButton(

@@ -321,32 +321,32 @@ def _main(page: ft.Page):
                 ft.ElevatedButton(
                     content=ft.Text(value="get status", size=20),
                     tooltip='get core info',
-                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
                     on_click=click_btn_cmd_query),
                 ft.ElevatedButton(
                     content=ft.Text(value="led strip ON", size=20),
                     tooltip='turn LED strip ON',
-                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
                     on_click=click_btn_cmd_led_on),
                 ft.ElevatedButton(
                     content=ft.Text(value="led strip OFF", size=20),
                     tooltip='turn LED strip OFF',
-                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
                     on_click=click_btn_cmd_led_off),
                 ft.ElevatedButton(
                     content=ft.Text(value="motor left", size=20),
                     tooltip='move motor left',
-                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
                     on_click=click_btn_cmd_motor_left),
                 ft.ElevatedButton(
                     content=ft.Text(value="motor right", size=20),
                     tooltip='move motor right',
-                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
                     on_click=click_btn_cmd_motor_right),
                 ft.ElevatedButton(
                     content=ft.Text(value="limit left", size=20),
                     tooltip='test motor limit left',
-                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
                     on_click=click_btn_cmd_limit_left),
                 ft.ElevatedButton(
                     content=ft.Text(value="limit right", size=20),
@@ -356,17 +356,17 @@ def _main(page: ft.Page):
                 # # todo: do this increase interval command in firmware
                 # ft.ElevatedButton(
                 #     content=ft.Text(value="increase interval", size=20),
-                #     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                #     color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
                 #     on_click=click_btn_cmd_inc_time),
                 ft.ElevatedButton(
                     content=ft.Text(value="run", size=20),
                     tooltip='go to run mode',
-                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
                     on_click=click_btn_cmd_run),
                 # ft.ElevatedButton(
                 #     content=ft.Text(value="download", size=20),
                 #     tooltip = 'go to download mode',
-                #     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                #     color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
                 #     on_click=click_btn_cmd_dl),
             ], alignment=ft.MainAxisAlignment.CENTER, expand=1)
         )
@@ -381,27 +381,27 @@ def _main(page: ft.Page):
                     weight=ft.FontWeight.BOLD),
                 ft.ElevatedButton(
                     content=ft.Text(value="act display", size=20),
-                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
                     on_click=click_btn_cmd_mini_display_out),
                 ft.ElevatedButton(
                     content=ft.Text(value="read display", size=20),
-                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
                     on_click=click_btn_cmd_mini_display_in),
                 ft.ElevatedButton(
                     content=ft.Text(value="act wheel", size=20),
-                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
                     on_click=click_btn_cmd_mini_display_wheel),
                 ft.ElevatedButton(
                     content=ft.Text(value="act wifi", size=20),
-                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
                     on_click=click_btn_cmd_mini_wifi_out),
                 ft.ElevatedButton(
                     content=ft.Text(value="read wifi", size=20),
-                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
                     on_click=click_btn_cmd_mini_wifi_in),
                 ft.ElevatedButton(
                     content=ft.Text(value="act mini LED", size=20),
-                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
                     on_click=click_btn_cmd_mini_leds),
             ], alignment=ft.MainAxisAlignment.CENTER, expand=1)
         )

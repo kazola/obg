@@ -318,10 +318,10 @@ def _main(page: ft.Page):
                     color=ft.colors.BLACK,
                     weight=ft.FontWeight.BOLD,
                 ),
-                # ft.ElevatedButton(
-                #     content=ft.Text(value="get status", size=20),
-                #     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
-                #     on_click=click_btn_cmd_query),
+                ft.ElevatedButton(
+                    content=ft.Text(value="get status", size=20),
+                    color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,
+                    on_click=click_btn_cmd_query),
                 ft.ElevatedButton(
                     content=ft.Text(value="led strip ON", size=20),
                     color=ft.colors.WHITE, bgcolor=ft.colors.BLACK,

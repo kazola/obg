@@ -317,6 +317,8 @@ def _main(page: ft.Page):
                     size=50,
                     color=ft.colors.BLACK,
                     weight=ft.FontWeight.BOLD,
+                    overflow=ft.TextOverflow.VISIBLE,
+                    text_align=ft.TextAlign.CENTER
                 ),
                 ft.ElevatedButton(
                     content=ft.Text(value="get status", size=20),

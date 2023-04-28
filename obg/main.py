@@ -177,12 +177,6 @@ def _main(page: ft.Page):
 
     @_on_click_ensure_connected
     @_on_click_ensure_core
-    def click_btn_cmd_dl(_):
-        _t('sending cmd DL')
-        ruc(_ble_cmd_dl())
-
-    @_on_click_ensure_connected
-    @_on_click_ensure_core
     def click_btn_cmd_inc_time(_):
         _t('sending cmd INC_TIME')
         ruc(_ble_cmd_inc_time())
@@ -371,12 +365,12 @@ def _main(page: ft.Page):
                 ft.ElevatedButton(
                     content=ft.Text(value="interval", size=20),
                     tooltip='adjust time between scans',
-                    color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
+                    color=ft.colors.BLACK, bgcolor=ft.colors.ORANGE_400,
                     on_click=click_btn_cmd_inc_time),
                 ft.ElevatedButton(
                     content=ft.Text(value="sleep_wifi", size=20),
                     tooltip='toggle sleep wifi',
-                    color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
+                    color=ft.colors.BLACK, bgcolor=ft.colors.ORANGE_400,
                     on_click=click_btn_cmd_sleep_wifi),
                 ft.ElevatedButton(
                     content=ft.Text(value="run", size=20),
@@ -481,13 +475,6 @@ def _main(page: ft.Page):
         else:
             _t('    error cmd RUN')
 
-    async def _ble_cmd_dl():
-        rv = await boc.cmd_dl()
-        if rv == 0:
-            _t('    OK cmd DL')
-        else:
-            _t('    error cmd DL')
-
     async def _ble_cmd_inc_time():
         rv, v = await boc.cmd_inc_time()
         if rv == 0:
@@ -498,7 +485,8 @@ def _main(page: ft.Page):
     async def _ble_cmd_sleep_wifi():
         rv, v = await boc.cmd_sleep_wifi()
         if rv == 0:
-            _t('    OK cmd SLEEP_WIFI {}'.format(v))
+            _ = v.split('_')[1]
+            _t('scanners WIFI {} between runs'.format(_))
         else:
             _t('    error cmd SLEEP_WIFI')
 

@@ -134,6 +134,10 @@ def _main(page: ft.Page):
         return wrapper
 
     def click_btn_scan(_):
+        if ruc(_ble_is_connected()):
+            _t("disconnecting before doing scan")
+            ruc(_ble_disconnect())
+
         dd_devs.value = ''
         dd_devs.options = []
         page.update()

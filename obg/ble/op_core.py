@@ -47,8 +47,9 @@ def _is_cmd_done(c, a):
         rv = True
     if c == 'mr' and a == 'mr_ok':
         rv = True
-    if c == 'ba' and int(a):
+    if c == 'ba' and a.isnumeric():
         rv = True
+    # limit left and limit right
     if c == 'll' and len(a) == 4:
         rv = True
     if c == 'lr' and len(a) == 4:

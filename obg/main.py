@@ -189,6 +189,12 @@ def _main(page: ft.Page):
 
     @_on_click_ensure_connected
     @_on_click_ensure_core
+    def click_btn_cmd_sleep_wifi(_):
+        _t('sending cmd SLEEP_WIFI')
+        ruc(_ble_cmd_sleep_wifi())
+
+    @_on_click_ensure_connected
+    @_on_click_ensure_core
     def click_btn_cmd_query(_):
         _t('sending cmd STATUS')
         ruc(_ble_cmd_status())
@@ -368,15 +374,15 @@ def _main(page: ft.Page):
                     color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
                     on_click=click_btn_cmd_inc_time),
                 ft.ElevatedButton(
+                    content=ft.Text(value="sleep_wifi", size=20),
+                    tooltip='toggle sleep wifi',
+                    color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
+                    on_click=click_btn_cmd_sleep_wifi),
+                ft.ElevatedButton(
                     content=ft.Text(value="run", size=20),
                     tooltip='go to run mode',
-                    color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
+                    color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_GREEN_400,
                     on_click=click_btn_cmd_run),
-                # ft.ElevatedButton(
-                #     content=ft.Text(value="download", size=20),
-                #     tooltip = 'go to download mode',
-                #     color=ft.colors.BLACK, bgcolor=ft.colors.LIGHT_BLUE,
-                #     on_click=click_btn_cmd_dl),
             ], alignment=ft.MainAxisAlignment.CENTER, expand=1)
         )
 
@@ -488,6 +494,13 @@ def _main(page: ft.Page):
             _t('    OK cmd INC_TIME {}'.format(v))
         else:
             _t('    error cmd INC_TIME')
+
+    async def _ble_cmd_sleep_wifi():
+        rv, v = await boc.cmd_sleep_wifi()
+        if rv == 0:
+            _t('    OK cmd SLEEP_WIFI {}'.format(v))
+        else:
+            _t('    error cmd SLEEP_WIFI')
 
     async def _ble_cmd_status():
         rv, v = await boc.cmd_status()

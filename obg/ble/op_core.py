@@ -29,10 +29,11 @@ def _is_cmd_done(c, a):
 
     if c == 'ru' and a == 'run_ok':
         rv = True
-    if c == 'dl' and a == 'dl_ok':
-        rv = True
     # increase time
     if c == 'it' and a in ('5m', '15m', '30m'):
+        rv = True
+    # sleep wifi
+    if c == 'sw' and a in ('sw_on', 'sw_off'):
         rv = True
     if c == 'ma' and len(a) == 17:
         rv = True
@@ -115,16 +116,19 @@ class BleOptodeCore:    # pragma: no cover
         rv = await self._ans_wait()
         return 0 if rv == b'run_ok' else 1
 
-    async def cmd_dl(self):
-        await self._cmd('dl')
-        rv = await self._ans_wait()
-        return 0 if rv == b'dl_ok' else 1
-
     async def cmd_inc_time(self):
         await self._cmd('it')
         rv = await self._ans_wait()
         valid_times = (b'5m', b'15m', b'30m')
         if rv in valid_times:
+            return 0, rv.decode()
+        return 1, ''
+
+    async def cmd_sleep_wifi(self):
+        await self._cmd('sw')
+        rv = await self._ans_wait()
+        valid_sleep_wifi_ans = (b'sw_on', b'sw_off')
+        if rv in valid_sleep_wifi_ans:
             return 0, rv.decode()
         return 1, ''
 
